@@ -39,9 +39,33 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'work.ishann@gmail.com').trim().toLowerCase();
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ishan104';
 
-// Allowed CORS Origins from environment
-const rawOrigins = process.env.ALLOWED_ORIGINS || 'http://localhost:3000,http://127.0.0.1:3000';
-const allowedOrigins = rawOrigins.split(',').map(o => o.trim()).filter(Boolean);
+// Allowed CORS Origins from environment + Auto-detect deployment domains
+const rawOrigins = process.env.ALLOWED_ORIGINS || '';
+const configuredOrigins = rawOrigins.split(',').map(o => o.trim()).filter(Boolean);
+
+function isOriginPermitted(origin, req) {
+  if (!origin) return true;
+  if (!IS_PROD) return true;
+  if (configuredOrigins.includes(origin)) return true;
+  try {
+    const parsed = new URL(origin);
+    const host = parsed.hostname.toLowerCase();
+    if (
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host.endsWith('.onrender.com') ||
+      host.endsWith('.up.railway.app') ||
+      host.endsWith('.spicyhub.com') ||
+      host === 'spicyhub.com'
+    ) {
+      return true;
+    }
+    if (req && req.headers && req.headers.host && parsed.host === req.headers.host) {
+      return true;
+    }
+  } catch (_) {}
+  return false;
+}
 
 // ==========================================
 // 1. SECURITY HEADERS & DEFENSES (Area 6, 9, 11, 16)
@@ -54,7 +78,7 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'"],
+      connectSrc: ["'self'", "https://fonts.googleapis.com", "https://fonts.gstatic.com"],
       frameAncestors: ["'self'"],
       objectSrc: ["'none'"],
       baseUri: ["'self'"]
@@ -80,13 +104,11 @@ if (IS_PROD) {
 // CORS Hardening (Area 13)
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow non-browser requests or same-origin requests without Origin header
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin) || !IS_PROD) {
+    if (isOriginPermitted(origin)) {
       return callback(null, true);
     }
     logSecurityEvent('CORS_ORIGIN_REJECTED', { origin });
-    return callback(new Error('CORS request blocked by security policy.'));
+    return callback(null, false);
   },
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -116,9 +138,16 @@ app.use((req, res, next) => {
 // Serve strictly allowed static assets (NEVER expose rootDir directly)
 app.use('/assets', express.static(path.join(rootDir, 'assets'), {
   maxAge: '1d',
-  dotfiles: 'ignore'
+  dotfiles: 'ignore',
+  setHeaders: (res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
 }));
-app.use('/favicon.svg', express.static(path.join(rootDir, 'favicon.svg')));
+app.use('/favicon.svg', express.static(path.join(rootDir, 'favicon.svg'), {
+  setHeaders: (res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
+}));
 
 // ==========================================
 // 2. AUTHENTICATION & AUTHORIZATION MIDDLEWARES (Area 12, 18)
