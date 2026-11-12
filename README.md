@@ -22,14 +22,6 @@ npm start
 
 ---
 
-## 🔐 B2B SaaS Superadmin Console (Private Link Only)
-
-- **Direct URL**: [http://localhost:3000/admin](http://localhost:3000/admin) *(Not linked anywhere on public pages)*
-- **Authorized Email**: `work.ishann@gmail.com`
-- **Password**: `ishan104`
-
----
-
 ## 💼 B2B SaaS Superadmin Capabilities
 
 ### 1. 📋 Inbound 7-Day Trial Applications Pipeline
