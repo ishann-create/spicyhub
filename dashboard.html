@@ -1,0 +1,2797 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#163d32" />
+  <title>Spicyhub Restaurant OS — Operational Portal</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #17211e;
+      --muted: #6b7771;
+      --orange: #ff6b35;
+      --orange-dark: #e95726;
+      --orange-light: #fff3ee;
+      --cream: #fbfaf7;
+      --line: #e7e9e3;
+      --green: #163d32;
+      --mint: #dff3e8;
+      --mint-dark: #1f6e4a;
+      --yellow: #f59e0b;
+      --yellow-light: #fef3c7;
+      --red: #ef4444;
+      --red-light: #fee2e2;
+      --card: #ffffff;
+      --radius: 12px;
+      --shadow: 0 4px 20px rgba(23, 33, 30, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      line-height: 1.5;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Navigation */
+    aside.sidebar {
+      width: 260px;
+      background: var(--green);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      z-index: 30;
+    }
+    .side-brand {
+      padding: 24px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      text-decoration: none;
+      color: #fff;
+    }
+    .side-mark {
+      width: 36px;
+      height: 36px;
+      background: var(--orange);
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      color: #fff;
+      box-shadow: inset 0 -2px rgba(0,0,0,0.2);
+    }
+    .side-title {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 19px;
+      letter-spacing: -0.5px;
+    }
+    .side-title span { color: var(--orange); }
+    .side-title small {
+      display: block;
+      font-size: 8px;
+      letter-spacing: 2px;
+      color: #9cb3a8;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .side-menu {
+      flex: 1;
+      padding: 20px 12px;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+    }
+    .side-item button {
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      padding: 12px 14px;
+      border-radius: 9px;
+      color: #c7d8cf;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.15s ease;
+    }
+    .side-item button:hover {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+    .side-item button.active {
+      background: var(--orange);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+    }
+    .side-item button .badge {
+      margin-left: auto;
+      background: rgba(0,0,0,0.2);
+      padding: 2px 7px;
+      border-radius: 20px;
+      font-size: 11px;
+    }
+
+    .side-footer {
+      padding: 18px 16px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .outlet-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #9cb3a8;
+      background: rgba(0,0,0,0.2);
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+    .outlet-dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #10b981;
+    }
+    .btn-site-link {
+      color: #c7d8cf;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.15s ease;
+    }
+    .btn-site-link:hover {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+
+    /* Main Content Area */
+    main.main-content {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header Bar */
+    header.top-bar {
+      height: 70px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .top-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .page-title {
+      font-family: 'Manrope', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: var(--mint);
+      color: var(--mint-dark);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .status-pill .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--mint-dark);
+      border-radius: 50%;
+    }
+
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .live-clock {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      background: var(--cream);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+    }
+    .btn-pos-order {
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 9px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s ease, transform 0.1s ease;
+      box-shadow: 0 2px 8px rgba(255, 107, 53, 0.25);
+    }
+    .btn-pos-order:hover {
+      background: var(--orange-dark);
+      transform: translateY(-1px);
+    }
+
+    /* Views */
+    .view-container {
+      padding: 32px;
+      flex: 1;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Metric Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .kpi-card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 22px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--line);
+    }
+    .kpi-card.accent-orange::after { background: var(--orange); }
+    .kpi-card.accent-green::after { background: var(--green); }
+    .kpi-card.accent-yellow::after { background: var(--yellow); }
+    .kpi-card.accent-mint::after { background: var(--mint-dark); }
+    
+    .kpi-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .kpi-value {
+      font-family: 'Manrope', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--ink);
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    .kpi-sub {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .kpi-trend-up { color: #16a34a; font-weight: 700; }
+
+    /* Overview Split */
+    .dashboard-split {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+    }
+    .card-panel {
+      background: #fff;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+    .panel-header h3 {
+      font-family: 'Manrope', sans-serif;
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    /* Table Styles */
+    .table-responsive {
+      overflow-x: auto;
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+    table.data-table th {
+      padding: 10px 14px;
+      background: var(--cream);
+      font-weight: 700;
+      color: var(--muted);
+      border-bottom: 1px solid var(--line);
+    }
+    table.data-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+    table.data-table tr:hover { background: #fafbfa; }
+    
+    .badge-status {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badge-status.new { background: #e0f2fe; color: #0284c7; }
+    .badge-status.preparing { background: var(--yellow-light); color: #d97706; }
+    .badge-status.ready { background: var(--mint); color: var(--mint-dark); }
+    .badge-status.completed { background: #f3f4f6; color: #4b5563; }
+    .badge-status.cancelled { background: var(--red-light); color: var(--red); }
+    .badge-status.occupied { background: #ffede6; color: var(--orange-dark); }
+    .badge-status.available { background: #f3f4f6; color: #4b5563; }
+
+    /* Tables Floor Grid */
+    .floor-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .table-box {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      background: #fafbfa;
+      transition: all 0.15s ease;
+      cursor: pointer;
+      position: relative;
+    }
+    .table-box:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .table-box.occupied { background: #fff8f5; border-color: #ffd0bf; }
+    .table-box.ready { background: #f0fdf4; border-color: #bbf7d0; }
+    .table-box.available { background: #fff; }
+    .table-no {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+    }
+    .table-box.occupied .table-no { color: var(--orange); }
+    .table-box.ready .table-no { color: #16a34a; }
+    .table-box.available .table-no { color: var(--ink); }
+    .table-cap {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .table-state-pill {
+      margin-top: 8px;
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+    .table-box.occupied .table-state-pill { background: #ffede6; color: var(--orange-dark); }
+    .table-box.ready .table-state-pill { background: #dcfce7; color: #15803d; }
+    .table-box.available .table-state-pill { background: #f3f4f6; color: #6b7280; }
+
+    /* POS Layout */
+    .pos-layout {
+      display: grid;
+      grid-template-columns: 1fr 390px;
+      gap: 24px;
+      height: calc(100vh - 160px);
+    }
+    .pos-catalog {
+      overflow-y: auto;
+      padding-right: 12px;
+    }
+    .cat-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .cat-pills {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .cat-btn {
+      background: #fff;
+      border: 1px solid var(--line);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--muted);
+      transition: all 0.15s ease;
+    }
+    .cat-btn.active, .cat-btn:hover {
+      background: var(--ink);
+      color: #fff;
+      border-color: var(--ink);
+    }
+    .btn-action-small {
+      background: #fff;
+      border: 1px solid var(--line);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .btn-action-small:hover {
+      background: var(--cream);
+      border-color: var(--muted);
+    }
+    .btn-action-small.danger:hover {
+      background: var(--red-light);
+      color: var(--red);
+      border-color: var(--red);
+    }
+
+    .dish-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 16px;
+    }
+    .dish-card {
+      background: #fff;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      transition: all 0.15s ease;
+      position: relative;
+    }
+    .dish-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+      border-color: var(--orange);
+    }
+    .dish-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .dish-name {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--ink);
+    }
+    .veg-dot {
+      width: 14px;
+      height: 14px;
+      border: 1.5px solid #16a34a;
+      display: grid;
+      place-items: center;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .veg-dot::after {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: #16a34a;
+      border-radius: 50%;
+    }
+    .veg-dot.non-veg { border-color: #dc2626; }
+    .veg-dot.non-veg::after { background: #dc2626; }
+    .dish-desc {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+    .dish-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+    .dish-price {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--ink);
+    }
+    .dish-tools {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--line);
+    }
+
+    /* POS Cart Sidebar */
+    .pos-cart {
+      background: #fff;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .cart-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+      background: var(--cream);
+    }
+    .cart-title {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 17px;
+    }
+    .cart-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .cart-meta select, .cart-meta input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .cart-customer-box {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .cart-customer-box input {
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .cart-email-note {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+    .cart-items {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .cart-empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 40px 0;
+      font-size: 13px;
+    }
+    .cart-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+    .cart-item-info { flex: 1; }
+    .cart-item-name { font-size: 13px; font-weight: 700; }
+    .cart-item-unit { font-size: 11px; color: var(--muted); }
+    .cart-item-qty { display: flex; align-items: center; gap: 6px; }
+    .btn-qty {
+      width: 24px;
+      height: 24px;
+      border: 1px solid var(--line);
+      background: var(--cream);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      display: grid;
+      place-items: center;
+    }
+    .cart-item-price {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      width: 60px;
+      text-align: right;
+    }
+
+    .cart-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--line);
+      background: var(--cream);
+    }
+    .cart-summary-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .cart-total-line {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--ink);
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--line);
+    }
+    .btn-checkout {
+      width: 100%;
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 9px;
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 14px;
+      transition: background 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-checkout:hover { background: var(--orange-dark); }
+
+    /* KDS (Kitchen Display System) */
+    .kds-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .kot-card {
+      background: #fff;
+      border-radius: var(--radius);
+      border: 2px solid var(--line);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .kot-card.status-preparing { border-color: var(--yellow); }
+    .kot-card.status-ready { border-color: #16a34a; }
+    .kot-card.status-new { border-color: var(--orange); }
+    
+    .kot-header {
+      padding: 12px 16px;
+      background: var(--cream);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+    }
+    .kot-no { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 16px; }
+    .kot-table {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--green);
+      background: var(--mint);
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+    .kot-body { padding: 16px; flex: 1; }
+    .kot-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .kot-item-qty { font-weight: 800; color: var(--orange); }
+    .kot-footer {
+      padding: 12px 16px;
+      background: #fafbfa;
+      display: flex;
+      gap: 8px;
+    }
+    .btn-kot-action {
+      flex: 1;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-kot-prepare { background: var(--yellow-light); color: #b45309; }
+    .btn-kot-ready { background: var(--mint); color: var(--mint-dark); }
+    .btn-kot-complete { background: var(--green); color: #fff; }
+
+    /* Inventory Progress Bars */
+    .inv-progress-bg {
+      width: 100%;
+      height: 8px;
+      background: var(--line);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .inv-progress-bar {
+      height: 100%;
+      background: var(--green);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    .inv-progress-bar.low { background: var(--red); }
+    .inv-progress-bar.medium { background: var(--yellow); }
+
+    .inline-stock-edit {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .inline-stock-edit input {
+      width: 70px;
+      padding: 4px 6px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    /* Modal Backdrop */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(23, 33, 30, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: none;
+      place-items: center;
+      padding: 20px;
+    }
+    .modal-card {
+      background: #fff;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: modalPop 0.2s ease;
+    }
+    @keyframes modalPop {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-header {
+      padding: 20px 24px;
+      background: var(--cream);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+    }
+    .modal-close-btn {
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .modal-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-group label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+    }
+    .modal-footer {
+      padding: 16px 24px;
+      background: #fafbfa;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* Thermal / E-Bill Invoice Modal */
+    .receipt-modal-card {
+      max-width: 440px;
+      background: #fff;
+      font-family: 'Courier New', Courier, monospace;
+    }
+    .receipt-paper {
+      padding: 24px;
+      background: #fff;
+      border: 1px dashed #bbb;
+      margin: 16px;
+      border-radius: 8px;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.03);
+    }
+    .receipt-header {
+      text-align: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed #999;
+    }
+    .receipt-brand {
+      font-family: 'Manrope', sans-serif;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+    .receipt-brand span { color: var(--orange); }
+    .receipt-table-items {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 13px;
+    }
+    .receipt-table-items th {
+      border-bottom: 1px dashed #999;
+      padding: 4px 0;
+      text-align: left;
+    }
+    .receipt-table-items td {
+      padding: 4px 0;
+      vertical-align: top;
+    }
+    .receipt-badge-delivery {
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      margin: 12px 0;
+      text-align: center;
+    }
+    .delivery-email { background: #dcfce7; color: #166534; }
+    .delivery-hardcopy { background: #e0f2fe; color: #075985; }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--ink);
+      color: #fff;
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      display: none;
+      align-items: center;
+      gap: 10px;
+      z-index: 1000;
+      animation: slideUp 0.25s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Print Formatting */
+    @media print {
+      body * { visibility: hidden; }
+      #printableReceipt, #printableReceipt * { visibility: visible; }
+      #printableReceipt {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 10px;
+        border: none;
+        box-shadow: none;
+      }
+      .no-print { display: none !important; }
+    }
+    /* Unified Restaurant OS In-App Owner Login & Trial Gateway */
+    #ownerLoginScreen {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 25%, #fbfaf7 0%, #edf1ec 100%);
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      overflow-y: auto;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+    #ownerLoginScreen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .auth-container {
+      width: 100%;
+      max-width: 460px;
+      position: relative;
+      z-index: 10;
+    }
+    .auth-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .auth-logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .logo-mark {
+      width: 44px;
+      height: 44px;
+      background: var(--orange);
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-family: 'Manrope', sans-serif;
+      font-weight: 900;
+      font-size: 24px;
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(255, 107, 53, 0.35);
+    }
+    .logo-text {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 900;
+      font-size: 26px;
+      letter-spacing: -0.5px;
+      text-align: left;
+    }
+    .logo-text span { color: var(--orange); }
+    .logo-text small {
+      display: block;
+      font-size: 9px;
+      letter-spacing: 2.5px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+    .auth-subtitle {
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .auth-card {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 32px 28px;
+      box-shadow: 0 20px 45px rgba(22, 61, 50, 0.08);
+    }
+    .card-title {
+      font-family: 'Manrope', sans-serif;
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .card-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .auth-field {
+      margin-bottom: 16px;
+    }
+    .auth-field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+    .auth-input-wrap {
+      position: relative;
+    }
+    .auth-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--line);
+      border-radius: 9px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--ink);
+      background: #fafbfa;
+      transition: all 0.15s ease;
+    }
+    .auth-input:focus {
+      outline: none;
+      border-color: var(--orange);
+      background: #fff;
+      box-shadow: 0 0 0 4px var(--orange-light);
+    }
+    .auth-pwd-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--muted);
+      padding: 4px;
+    }
+    .btn-auth-submit {
+      width: 100%;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      padding: 13px;
+      border-radius: 9px;
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.15s ease;
+      box-shadow: 0 4px 14px rgba(22, 61, 50, 0.25);
+      margin-top: 20px;
+    }
+    .btn-auth-submit:hover {
+      background: #0f2c24;
+      transform: translateY(-1px);
+    }
+    .auth-alert-banner {
+      display: none;
+      padding: 12px 14px;
+      border-radius: 9px;
+      margin-bottom: 18px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .auth-alert-error {
+      background: #fee2e2;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #b91c1c;
+    }
+    .auth-alert-expired {
+      background: #fef3c7;
+      border: 1.5px solid #f59e0b;
+      color: #92400e;
+    }
+    .auth-alert-expired h4 {
+      font-family: 'Manrope', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 3px;
+      color: #b45309;
+    }
+    .auth-demo-chips {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--line);
+    }
+    .auth-demo-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .auth-chip {
+      background: var(--cream);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      margin-bottom: 6px;
+      transition: all 0.15s ease;
+    }
+    .auth-chip:hover {
+      border-color: var(--orange);
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- UNIFIED RESTAURANT OS SIGN-IN GATEWAY -->
+  <div id="ownerLoginScreen">
+    <div class="auth-container">
+      <div class="auth-header">
+        <a href="/" class="auth-logo-badge">
+          <div class="logo-mark">S</div>
+          <div class="logo-text">
+            Spicyhub<span>.</span>
+            <small>RESTAURANT OS</small>
+          </div>
+        </a>
+        <p class="auth-subtitle">Restaurant Owner Operational Portal</p>
+      </div>
+
+      <div id="authAlertBox" class="auth-alert-banner"></div>
+
+      <div class="auth-card">
+        <h2 class="card-title">Sign In to Restaurant OS</h2>
+        <p class="card-desc">Enter your registered work credentials to access your restaurant workspace.</p>
+
+        <form id="ownerLoginForm" onsubmit="handleOwnerAuthSubmit(event)">
+          <div class="auth-field">
+            <label>Work Email</label>
+            <div class="auth-input-wrap">
+              <input type="email" id="authEmailInput" class="auth-input" placeholder="e.g. owner@yourrestaurant.com" required autocomplete="email">
+            </div>
+          </div>
+
+          <div class="auth-field">
+            <label>Password</label>
+            <div class="auth-input-wrap">
+              <input type="password" id="authPasswordInput" class="auth-input" placeholder="••••••••" required autocomplete="current-password">
+              <button type="button" class="auth-pwd-toggle" onclick="toggleAuthPasswordVisibility()" title="Show/Hide">👁️</button>
+            </div>
+          </div>
+
+          <button type="submit" id="authSubmitBtn" class="btn-auth-submit">
+            <span>Enter Restaurant OS</span>
+            <span>→</span>
+          </button>
+        </form>
+
+        <div class="auth-demo-chips">
+          <div class="auth-demo-label">
+            <span>Quick Demo Accounts</span>
+            <span>Click to fill</span>
+          </div>
+          <div class="auth-chip" onclick="autofillAuth('aanya@tandoorhouse.in', 'spicyhub123')">
+            <div>
+              <strong>The Tandoor House</strong> (Jaipur Outlet)
+              <div style="color:var(--muted); font-size:11px;">aanya@tandoorhouse.in</div>
+            </div>
+            <span style="color:var(--orange); font-weight:700;">Fill →</span>
+          </div>
+          <div class="auth-chip" onclick="autofillAuth('karan@spiceroute.com', 'spicyhub123')">
+            <div>
+              <strong>Spice Route Bistro</strong> (Bengaluru)
+              <div style="color:var(--muted); font-size:11px;">karan@spiceroute.com</div>
+            </div>
+            <span style="color:var(--orange); font-weight:700;">Fill →</span>
+          </div>
+          <div class="auth-chip" onclick="autofillAuth('rohit@royalspice.in', 'spicyhub123')">
+            <div>
+              <strong>Royal Spice Dining</strong> (Delhi 7-Day Trial)
+              <div style="color:var(--muted); font-size:11px;">rohit@royalspice.in</div>
+            </div>
+            <span style="color:var(--orange); font-weight:700;">Fill →</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align:center; margin-top:20px; font-size:12px; color:var(--muted);">
+        Need a 7-day trial? <a href="/#trial" style="color:var(--green); font-weight:700; text-decoration:none;">Request on Homepage</a> &nbsp;·&nbsp; <a href="/" style="color:var(--muted); text-decoration:none;">← Return Home</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <a href="/" class="side-brand">
+      <div class="side-mark">S</div>
+      <div class="side-title">
+        Spicyhub<span>.</span>
+        <small>RESTAURANT OS</small>
+      </div>
+    </a>
+
+    <ul class="side-menu">
+      <li class="side-item">
+        <button class="active" onclick="switchTab('overview')">
+          <span>📊</span> Overview & Live Stats
+        </button>
+      </li>
+      <li class="side-item">
+        <button onclick="switchTab('pos')">
+          <span>🧾</span> POS Billing & Menu
+        </button>
+      </li>
+      <li class="side-item">
+        <button onclick="switchTab('kds')">
+          <span>🍳</span> Kitchen Display (KDS)
+          <span class="badge" id="kdsBadge">3</span>
+        </button>
+      </li>
+      <li class="side-item">
+        <button onclick="switchTab('floor')">
+          <span>🪑</span> Floor & Tables
+        </button>
+      </li>
+      <li class="side-item">
+        <button onclick="switchTab('inventory')">
+          <span>📦</span> Stock & Ingredients
+          <span class="badge" id="invBadge" style="background:var(--red); display:none;">1</span>
+        </button>
+      </li>
+    </ul>
+
+    <div class="side-footer">
+      <!-- Subscription & Owner Footer -->
+      <div style="background:rgba(0,0,0,0.25); border-radius:10px; padding:12px; margin-bottom:4px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+          <span id="tenantSubBadge" style="background:#10b981; color:#fff; font-size:11px; font-weight:800; padding:2px 8px; border-radius:20px;">
+            🟢 7-Day Trial
+          </span>
+          <span id="tenantDaysLeft" style="font-size:11px; color:#9cb3a8; font-weight:700;">Active</span>
+        </div>
+        <div id="sidebarTenantName" style="font-family:'Manrope',sans-serif; font-weight:800; font-size:13px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+          Jaipur Main Outlet
+        </div>
+        <div id="sidebarOwnerEmail" style="font-size:11px; color:#9cb3a8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+          owner@spicyhub.com
+        </div>
+      </div>
+
+      <div style="display:flex; gap:6px;">
+        <button class="btn-site-link" style="flex:1; justify-content:center; background:rgba(255,255,255,0.08); border:none; cursor:pointer;" onclick="openModal('changePasswordModal')">
+          🔑 Password
+        </button>
+        <button class="btn-site-link" style="flex:1; justify-content:center; background:rgba(239,68,68,0.18); color:#fca5a5; border:none; cursor:pointer;" onclick="logoutTenant()">
+          🚪 Sign Out
+        </button>
+      </div>
+
+      <a href="/" class="btn-site-link" style="font-size:11px; opacity:0.8;">
+        <span>← Spicyhub Website</span>
+        <span>↗</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div class="top-left">
+        <h1 class="page-title" id="pageTitleHeading">Overview & Live Stats</h1>
+        <div class="status-pill">
+          <div class="dot"></div>
+          <span id="topLiveStatus">LIVE SERVICE ACTIVE</span>
+        </div>
+      </div>
+      <div class="top-right" style="display:flex; align-items:center; gap:12px;">
+        <div id="topSubscriptionPill" style="display:flex; align-items:center; gap:8px; background:var(--cream); padding:6px 14px; border-radius:20px; border:1px solid var(--line); font-size:12px; font-weight:700;">
+          <span id="subDotPill" style="width:8px; height:8px; background:#10b981; border-radius:50%; box-shadow:0 0 6px #10b981;"></span>
+          <span id="topSubText">7-Day Free Trial (Active)</span>
+        </div>
+        <div class="live-clock" id="liveClock">Loading time…</div>
+        <button class="btn-pos-order" onclick="switchTab('pos')">
+          <span>+</span> Create New Order
+        </button>
+      </div>
+    </header>
+
+    <div class="view-container">
+
+      <!-- TAB 1: OVERVIEW & LIVE STATS -->
+      <section id="tab-overview" class="tab-content active">
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card accent-orange">
+            <div class="kpi-label">Today's Net Sales</div>
+            <div class="kpi-value" id="kpiNetSales">₹0</div>
+            <div class="kpi-sub"><span class="kpi-trend-up">↗ 14.8%</span> vs yesterday</div>
+          </div>
+          <div class="kpi-card accent-green">
+            <div class="kpi-label">Total Orders Today</div>
+            <div class="kpi-value" id="kpiTotalOrders">0</div>
+            <div class="kpi-sub">Across dine-in & takeaway</div>
+          </div>
+          <div class="kpi-card accent-yellow">
+            <div class="kpi-label">Active Kitchen Tickets</div>
+            <div class="kpi-value" id="kpiActiveOrders">0</div>
+            <div class="kpi-sub">Currently in prep or ready</div>
+          </div>
+          <div class="kpi-card accent-mint">
+            <div class="kpi-label">Average Ticket Size</div>
+            <div class="kpi-value" id="kpiAvgTicket">₹0</div>
+            <div class="kpi-sub"><span class="kpi-trend-up">↗ 4.2%</span> healthy margin</div>
+          </div>
+        </div>
+
+        <div class="dashboard-split">
+          <!-- Live Orders Feed -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <h3>Live Service Queue</h3>
+              <button class="btn-pos-order" style="padding:6px 12px; font-size:12px;" onclick="loadDashboard()">↻ Refresh</button>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Order #</th>
+                    <th>Type / Table</th>
+                    <th>Customer</th>
+                    <th>Items</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Receipt</th>
+                  </tr>
+                </thead>
+                <tbody id="overviewOrdersTable">
+                  <tr><td colspan="7" style="text-align:center;">Loading orders...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Mini Floor Status -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <h3>Floor Map Status</h3>
+              <button class="cat-btn" style="padding:4px 10px; font-size:11px;" onclick="switchTab('floor')">Manage ↗</button>
+            </div>
+            <div class="floor-grid" id="miniFloorGrid">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: POS BILLING & NEW ORDER CHECKOUT -->
+      <section id="tab-pos" class="tab-content">
+        <div class="pos-layout">
+          <!-- Catalog -->
+          <div class="pos-catalog">
+            <div class="cat-bar">
+              <div class="cat-pills" id="posCategories">
+                <!-- Rendered via JS -->
+              </div>
+              <button class="btn-pos-order" style="padding:8px 14px; font-size:12px;" onclick="openAddDishModal()">
+                <span>+</span> Add New Dish / Menu Item
+              </button>
+            </div>
+            <div class="dish-grid" id="posDishGrid">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- Cart Sidebar -->
+          <div class="pos-cart">
+            <div class="cart-header">
+              <div class="cart-title">Billing & Order Ticket</div>
+              <div class="cart-meta">
+                <select id="posOrderType" onchange="toggleTablePicker()">
+                  <option value="Dine-In">Dine-In Table</option>
+                  <option value="Takeaway">Takeaway</option>
+                  <option value="Delivery">Delivery</option>
+                </select>
+                <select id="posTableSelect">
+                  <!-- Populated from tables DB -->
+                </select>
+              </div>
+              
+              <div class="cart-customer-box">
+                <input type="text" id="posCustomerName" placeholder="Customer Name (e.g. Rahul Sharma)">
+                <input type="email" id="posCustomerEmail" placeholder="Customer Email (Optional for Auto E-Bill)">
+                <div class="cart-email-note">
+                  ✉️ <em>If email is provided, the bill is automatically emailed. Otherwise, a physical hardcopy receipt is generated.</em>
+                </div>
+              </div>
+            </div>
+
+            <div class="cart-items" id="posCartItems">
+              <div class="cart-empty">No items added yet.<br>Click any dish from the catalog.</div>
+            </div>
+
+            <div class="cart-footer">
+              <div class="cart-summary-line">
+                <span>Subtotal</span>
+                <span id="posSubtotal">₹0.00</span>
+              </div>
+              <div class="cart-summary-line">
+                <span>GST (<span id="taxRatePercent">5</span>%)</span>
+                <span id="posTax">₹0.00</span>
+              </div>
+              <div class="cart-total-line">
+                <span>Total Due</span>
+                <span id="posTotal">₹0.00</span>
+              </div>
+              <button class="btn-checkout" onclick="submitPOSOrder()">
+                <span>⚡ Place Order & Settle Bill ↗</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: KITCHEN DISPLAY SYSTEM (KDS) -->
+      <section id="tab-kds" class="tab-content">
+        <div class="panel-header" style="background:#fff; padding:16px 20px; border-radius:var(--radius); border:1px solid var(--line); margin-bottom:24px;">
+          <div>
+            <h3 style="font-family:'Manrope',sans-serif; font-size:18px;">Live Kitchen Orders (KOT)</h3>
+            <p style="font-size:12px; color:var(--muted); margin-top:2px;">Real-time orders queue flowing directly from POS and floor service.</p>
+          </div>
+          <button class="btn-pos-order" style="padding:6px 12px; font-size:12px;" onclick="loadKDS()">↻ Refresh Tickets</button>
+        </div>
+        <div class="kds-grid" id="kdsGrid">
+          <!-- Rendered via JS -->
+        </div>
+      </section>
+
+      <!-- TAB 4: TABLE & FLOOR MAP (Add / Remove / Edit Capacity) -->
+      <section id="tab-floor" class="tab-content">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div>
+              <h3>Floor Map & Table Capacity Management</h3>
+              <p style="font-size:12px; color:var(--muted); margin-top:2px;">Manage seating, add new tables, edit guest capacities, or remove tables as your floor expands.</p>
+            </div>
+            <div style="display:flex; gap:12px;">
+              <button class="btn-pos-order" onclick="openAddTableModal()">
+                <span>+</span> Add New Table
+              </button>
+              <button class="btn-action-small" onclick="loadTables()">↻ Refresh</button>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:20px;" id="floorFullGrid">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: STOCK & INGREDIENT LEVELS (Real-time Chef Editing) -->
+      <section id="tab-inventory" class="tab-content">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div>
+              <h3>Stock & Ingredient Levels (Real-Time Chef Audit)</h3>
+              <p style="font-size:12px; color:var(--muted); margin-top:2px;">Chefs can edit stock amounts in real-time so management and owners can purchase replenishments.</p>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <button class="btn-pos-order" onclick="openAddIngredientModal()">
+                <span>+</span> Add New Ingredient
+              </button>
+              <button class="btn-action-small" onclick="loadInventory()">↻ Refresh</button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Item Name</th>
+                  <th>Current Stock (Edit Real-Time)</th>
+                  <th>Low Threshold</th>
+                  <th>Status</th>
+                  <th>Gauge</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryTable">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- MODAL: ADD / EDIT TABLE -->
+  <div class="modal-overlay" id="tableModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="tableModalTitle">Add New Restaurant Table</h3>
+        <button class="modal-close-btn" onclick="closeModal('tableModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Table Number / Code</label>
+          <input type="text" id="newTableNumber" placeholder="e.g. T10, T11, Rooftop-01">
+        </div>
+        <div class="form-group">
+          <label>Seating Capacity (Guests)</label>
+          <input type="number" id="newTableCapacity" value="4" min="1" max="50">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action-small" onclick="closeModal('tableModal')">Cancel</button>
+        <button class="btn-pos-order" onclick="submitAddTable()">Save Table</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT TABLE CAPACITY -->
+  <div class="modal-overlay" id="editCapacityModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="editCapacityTitle">Adjust Table Seating Capacity</h3>
+        <button class="modal-close-btn" onclick="closeModal('editCapacityModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editCapTableNo">
+        <div class="form-group">
+          <label>New Seating Capacity (Guests)</label>
+          <input type="number" id="editCapValue" min="1" max="50">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action-small" onclick="closeModal('editCapacityModal')">Cancel</button>
+        <button class="btn-pos-order" onclick="saveTableCapacity()">Update Capacity</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT MENU DISH -->
+  <div class="modal-overlay" id="dishModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="dishModalTitle">Add New Dish / Menu Item</h3>
+        <button class="modal-close-btn" onclick="closeModal('dishModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editDishId" value="">
+        <div class="form-group">
+          <label>Dish Name</label>
+          <input type="text" id="dishNameInput" placeholder="e.g. Tandoori Chicken Wings">
+        </div>
+        <div class="form-group">
+          <label>Menu Category</label>
+          <select id="dishCategorySelect">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Price (₹)</label>
+          <input type="number" id="dishPriceInput" placeholder="320" step="1">
+        </div>
+        <div class="form-group">
+          <label>Food Type</label>
+          <select id="dishVegSelect">
+            <option value="1">🌱 Vegetarian</option>
+            <option value="0">🍗 Non-Vegetarian</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Description / Ingredients (Optional)</label>
+          <textarea id="dishDescInput" rows="2" placeholder="Brief appetizing description of the dish..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action-small" onclick="closeModal('dishModal')">Cancel</button>
+        <button class="btn-pos-order" onclick="submitSaveDish()">Save Dish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD INGREDIENT -->
+  <div class="modal-overlay" id="ingredientModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Add New Inventory Raw Material</h3>
+        <button class="modal-close-btn" onclick="closeModal('ingredientModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Ingredient / Item Name</label>
+          <input type="text" id="ingNameInput" placeholder="e.g. Red Onions, Mozzarella Cheese">
+        </div>
+        <div class="form-group">
+          <label>Initial Stock Amount</label>
+          <input type="number" id="ingStockInput" value="50" step="0.5">
+        </div>
+        <div class="form-group">
+          <label>Measurement Unit</label>
+          <select id="ingUnitInput">
+            <option value="kg">kg (Kilograms)</option>
+            <option value="L">L (Liters)</option>
+            <option value="units">units (Pieces)</option>
+            <option value="packs">packs (Cartons)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Low Stock Warning Threshold</label>
+          <input type="number" id="ingThresholdInput" value="15" step="0.5">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action-small" onclick="closeModal('ingredientModal')">Cancel</button>
+        <button class="btn-pos-order" onclick="submitAddIngredient()">Save Material</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: RECEIPT & TAX INVOICE (Hardcopy & Automatic E-Bill) -->
+  <div class="modal-overlay" id="receiptModal">
+    <div class="modal-card receipt-modal-card">
+      <div class="modal-header no-print">
+        <h3>Order Settle & Receipt</h3>
+        <button class="modal-close-btn" onclick="closeModal('receiptModal')">&times;</button>
+      </div>
+
+      <div class="receipt-paper" id="printableReceipt">
+        <div class="receipt-header">
+          <div class="receipt-brand">SPICYHUB<span>.</span></div>
+          <div style="font-size:11px; margin-top:2px;">RESTAURANT OS & FINE DINING</div>
+          <div style="font-size:10px; color:#555;">Jaipur Main Outlet · GSTIN: 08AAACR1234F1Z5</div>
+          <div style="margin-top:6px; font-weight:bold; font-size:12px;">TAX INVOICE / BILL</div>
+        </div>
+
+        <div style="font-size:11px; line-height:1.4; border-bottom:1px dashed #999; padding-bottom:8px;">
+          <div>Order No : <strong id="recOrderNo">#1049</strong></div>
+          <div>Date     : <span id="recDate">12 Nov 2026, 01:15 PM</span></div>
+          <div>Table    : <span id="recTable">Table T02</span></div>
+          <div>Customer : <span id="recCustomer">Rahul Sharma</span></div>
+        </div>
+
+        <div id="recDeliveryBadge"></div>
+
+        <table class="receipt-table-items">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th style="text-align:center;">Qty</th>
+              <th style="text-align:right;">Amt (₹)</th>
+            </tr>
+          </thead>
+          <tbody id="recItemsBody">
+            <!-- Rendered via JS -->
+          </tbody>
+        </table>
+
+        <div style="border-top:1px dashed #999; padding-top:8px; font-size:12px; line-height:1.5;">
+          <div style="display:flex; justify-content:space-between;">
+            <span>Subtotal:</span>
+            <span id="recSubtotal">₹0.00</span>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span>GST (5%):</span>
+            <span id="recTax">₹0.00</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:15px; margin-top:6px; border-top:1px solid #000; padding-top:4px;">
+            <span>Grand Total:</span>
+            <span id="recGrandTotal">₹0.00</span>
+          </div>
+        </div>
+
+        <div style="text-align:center; margin-top:16px; font-size:10px; color:#666;">
+          THANK YOU FOR DINING WITH SPICYHUB!<br>
+          Visit us again soon.
+        </div>
+      </div>
+
+      <div class="modal-footer no-print">
+        <button class="btn-action-small" onclick="closeModal('receiptModal')">Done</button>
+        <button class="btn-pos-order" onclick="window.print()">
+          🖨️ Print Hardcopy Receipt
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CHANGE RESTAURANT OWNER PASSWORD -->
+  <div class="modal-overlay" id="changePasswordModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Change Restaurant Password</h3>
+        <button class="modal-close-btn" onclick="closeModal('changePasswordModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px; color:var(--muted); margin-bottom:6px;">
+          Update your login password for this restaurant workspace.
+        </p>
+        <div class="form-group">
+          <label>Current Password</label>
+          <input type="password" id="currentPwdInput" placeholder="Enter current password">
+        </div>
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="password" id="newPwdInput" placeholder="Enter new password (min. 4 chars)">
+        </div>
+        <div class="form-group">
+          <label>Confirm New Password</label>
+          <input type="password" id="confirmNewPwdInput" placeholder="Re-enter new password">
+        </div>
+        <div id="pwdChangeError" style="display:none; color:var(--red); font-size:12px; font-weight:700;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action-small" onclick="closeModal('changePasswordModal')">Cancel</button>
+        <button class="btn-pos-order" onclick="submitChangePassword()">Save Password</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast">Action completed successfully!</div>
+
+  <script>
+    // Global Tenant Session State
+    window.currentTenant = null;
+
+    function toggleAuthPasswordVisibility() {
+      const input = document.getElementById('authPasswordInput');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function autofillAuth(email, pwd) {
+      document.getElementById('authEmailInput').value = email;
+      document.getElementById('authPasswordInput').value = pwd;
+      clearAuthAlert();
+    }
+
+    function showAuthAlert(html, type = 'error') {
+      const box = document.getElementById('authAlertBox');
+      box.className = `auth-alert-banner ${type === 'expired' ? 'auth-alert-expired' : 'auth-alert-error'}`;
+      box.innerHTML = html;
+      box.style.display = 'block';
+    }
+
+    function clearAuthAlert() {
+      const box = document.getElementById('authAlertBox');
+      box.style.display = 'none';
+      box.innerHTML = '';
+    }
+
+    function showLoginScreen(alertHtml = null, alertType = 'error') {
+      const screen = document.getElementById('ownerLoginScreen');
+      screen.classList.remove('hidden');
+      if (alertHtml) {
+        showAuthAlert(alertHtml, alertType);
+      }
+    }
+
+    function hideLoginScreen() {
+      const screen = document.getElementById('ownerLoginScreen');
+      screen.classList.add('hidden');
+      clearAuthAlert();
+    }
+
+    async function handleOwnerAuthSubmit(e) {
+      e.preventDefault();
+      clearAuthAlert();
+
+      const email = document.getElementById('authEmailInput').value.trim();
+      const password = document.getElementById('authPasswordInput').value.trim();
+      const btn = document.getElementById('authSubmitBtn');
+
+      if (!email || !password) return;
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>Verifying credentials…</span>';
+
+      try {
+        const res = await fetch('/api/tenant/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (res.status === 403 && data.expired) {
+          showAuthAlert(`
+            <h4>⚠️ Subscription / 7-Day Trial Expired</h4>
+            <p>Access for <strong>${data.tenant?.name || 'this restaurant'}</strong> expired on <strong>${new Date(data.tenant?.subscription_expires_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}</strong>.</p>
+            <p style="margin-top:6px;">Please contact Spicyhub admin at <a href="mailto:work.ishann@gmail.com" style="color:#b45309; font-weight:700;">work.ishann@gmail.com</a> to renew your subscription.</p>
+          `, 'expired');
+          btn.disabled = false;
+          btn.innerHTML = '<span>Enter Restaurant OS</span> <span>→</span>';
+          return;
+        }
+
+        if (!res.ok || !data.success) {
+          showAuthAlert(`❌ ${data.error || 'Failed to authenticate. Please check your credentials.'}`, 'error');
+          btn.disabled = false;
+          btn.innerHTML = '<span>Enter Restaurant OS</span> <span>→</span>';
+          return;
+        }
+
+        localStorage.setItem('spicyhub_tenant_token', data.token);
+        localStorage.setItem('spicyhub_tenant', JSON.stringify(data.tenant));
+        window.currentTenant = data.tenant;
+        renderTenantInfo(data.tenant);
+
+        btn.innerHTML = '<span>Welcome to Restaurant OS!</span>';
+        setTimeout(() => {
+          hideLoginScreen();
+          btn.disabled = false;
+          btn.innerHTML = '<span>Enter Restaurant OS</span> <span>→</span>';
+          loadDashboard();
+        }, 300);
+
+      } catch (err) {
+        showAuthAlert('❌ Network error. Please ensure the Spicyhub server is running.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<span>Enter Restaurant OS</span> <span>→</span>';
+      }
+    }
+
+    async function checkTenantAuth() {
+      const token = localStorage.getItem('spicyhub_tenant_token');
+      if (!token) {
+        showLoginScreen();
+        return false;
+      }
+
+      try {
+        const res = await fetch('/api/tenant/me', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+
+        if (res.status === 401) {
+          localStorage.removeItem('spicyhub_tenant_token');
+          showLoginScreen('Please sign in to access your restaurant workspace.', 'error');
+          return false;
+        }
+
+        const data = await res.json();
+        if (data.isExpired || (res.status === 403 && data.expired)) {
+          localStorage.removeItem('spicyhub_tenant_token');
+          showLoginScreen(`
+            <h4>⚠️ Subscription / 7-Day Trial Expired</h4>
+            <p>Your workspace access has ended. To renew or upgrade your plan, please contact our team at <strong>work.ishann@gmail.com</strong>.</p>
+          `, 'expired');
+          return false;
+        }
+
+        if (data.success && data.tenant) {
+          window.currentTenant = data.tenant;
+          renderTenantInfo(data.tenant);
+          hideLoginScreen();
+          return true;
+        }
+      } catch (e) {
+        console.warn('Network warning checking tenant session:', e);
+      }
+      hideLoginScreen();
+      return true;
+    }
+
+    function renderTenantInfo(t) {
+      if (!t) return;
+      document.getElementById('sidebarTenantName').textContent = t.name;
+      document.getElementById('sidebarOwnerEmail').textContent = t.owner_email;
+
+      const isTrial = t.subscription_type === 'trial';
+      const days = t.days_remaining !== undefined ? t.days_remaining : 7;
+
+      const subBadge = document.getElementById('tenantSubBadge');
+      const daysLeft = document.getElementById('tenantDaysLeft');
+      const topSubText = document.getElementById('topSubText');
+      const subDotPill = document.getElementById('subDotPill');
+
+      if (isTrial) {
+        subBadge.textContent = '🟢 7-Day Trial';
+        subBadge.style.background = '#10b981';
+        daysLeft.textContent = `${days}d left`;
+        topSubText.textContent = `🟢 7-Day Trial (${days} Days Left)`;
+        subDotPill.style.background = '#10b981';
+      } else {
+        subBadge.textContent = `⭐ ${t.plan || 'Pro Plan'}`;
+        subBadge.style.background = '#ff6b35';
+        daysLeft.textContent = `${days}d left`;
+        topSubText.textContent = `⭐ ${t.plan || 'Pro Plan'} (${days} Days Left)`;
+        subDotPill.style.background = '#ff6b35';
+      }
+    }
+
+    function logoutTenant() {
+      localStorage.removeItem('spicyhub_tenant_token');
+      localStorage.removeItem('spicyhub_tenant');
+      window.currentTenant = null;
+      showLoginScreen();
+    }
+
+    async function submitChangePassword() {
+      const errBox = document.getElementById('pwdChangeError');
+      errBox.style.display = 'none';
+
+      const oldPassword = document.getElementById('currentPwdInput').value.trim();
+      const newPassword = document.getElementById('newPwdInput').value.trim();
+      const confirmPassword = document.getElementById('confirmNewPwdInput').value.trim();
+
+      if (!oldPassword || !newPassword) {
+        errBox.textContent = 'Please fill in both current and new password.';
+        errBox.style.display = 'block';
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        errBox.textContent = 'New passwords do not match.';
+        errBox.style.display = 'block';
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        errBox.textContent = 'New password must be at least 6 characters long.';
+        errBox.style.display = 'block';
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('spicyhub_tenant_token');
+        const res = await fetch('/api/tenant/change-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + (token || '')
+          },
+          body: JSON.stringify({ oldPassword, newPassword })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          showToast('🔑 Password updated successfully!');
+          closeModal('changePasswordModal');
+          document.getElementById('currentPwdInput').value = '';
+          document.getElementById('newPwdInput').value = '';
+          document.getElementById('confirmNewPwdInput').value = '';
+        } else {
+          errBox.textContent = data.error || 'Failed to update password.';
+          errBox.style.display = 'block';
+        }
+      } catch (err) {
+        errBox.textContent = 'Network error updating password.';
+        errBox.style.display = 'block';
+      }
+    }
+
+    // Live Clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('liveClock').textContent = now.toLocaleDateString('en-IN', {
+        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit'
+      });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.display = 'flex';
+      setTimeout(() => { t.style.display = 'none'; }, 3000);
+    }
+
+    function openModal(id) { document.getElementById(id).style.display = 'grid'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    // Tab Switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.side-item button').forEach(el => el.classList.remove('active'));
+
+      const target = document.getElementById('tab-' + tabId);
+      if (target) target.classList.add('active');
+
+      const btn = Array.from(document.querySelectorAll('.side-item button')).find(b => b.getAttribute('onclick')?.includes(tabId));
+      if (btn) btn.classList.add('active');
+
+      const headings = {
+        'overview': 'Overview & Live Stats',
+        'pos': 'POS Billing & Menu Checkout',
+        'kds': 'Kitchen Display System (KDS)',
+        'floor': 'Floor Map & Table Capacity Management',
+        'inventory': 'Stock & Ingredient Control (Chef Real-Time Audit)'
+      };
+      document.getElementById('pageTitleHeading').textContent = headings[tabId] || 'Spicyhub Restaurant OS';
+
+      if (tabId === 'overview') loadDashboard();
+      if (tabId === 'pos') loadMenu();
+      if (tabId === 'kds') loadKDS();
+      if (tabId === 'floor') loadTables();
+      if (tabId === 'inventory') loadInventory();
+    }
+
+    // 1. DASHBOARD OVERVIEW
+    async function loadDashboard() {
+      try {
+        const statsRes = await fetch('/api/dashboard/stats');
+        const stats = await statsRes.json();
+        
+        document.getElementById('kpiNetSales').textContent = '₹' + stats.netSales.toLocaleString('en-IN');
+        document.getElementById('kpiTotalOrders').textContent = stats.totalOrders;
+        document.getElementById('kpiActiveOrders').textContent = stats.activeOrders;
+        document.getElementById('kpiAvgTicket').textContent = '₹' + stats.avgTicket;
+
+        document.getElementById('kdsBadge').textContent = stats.activeOrders;
+        if (stats.settings && stats.settings.outlet_name) {
+          document.getElementById('outletBadgeText').textContent = stats.settings.outlet_name;
+        }
+        if (stats.settings && stats.settings.tax_rate) {
+          document.getElementById('taxRatePercent').textContent = stats.settings.tax_rate;
+        }
+
+        if (stats.lowStockCount > 0) {
+          const invB = document.getElementById('invBadge');
+          invB.style.display = 'inline-block';
+          invB.textContent = stats.lowStockCount;
+        }
+
+        const ordersRes = await fetch('/api/orders');
+        const ordersData = await ordersRes.json();
+        const tbody = document.getElementById('overviewOrdersTable');
+        
+        if (!ordersData.orders || ordersData.orders.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No orders recorded yet.</td></tr>';
+        } else {
+          tbody.innerHTML = ordersData.orders.slice(0, 7).map(ord => `
+            <tr>
+              <td><strong>${ord.order_no}</strong></td>
+              <td>${ord.table_number ? 'Table ' + ord.table_number : 'Takeaway'}</td>
+              <td>
+                <div>${ord.customer_name || 'Guest'}</div>
+                ${ord.customer_email ? `<small style="color:var(--muted);">${ord.customer_email}</small>` : ''}
+              </td>
+              <td>${ord.items ? ord.items.map(i => `${i.item_name} ×${i.quantity}`).join(', ') : '-'}</td>
+              <td><strong>₹${ord.total_amount}</strong></td>
+              <td><span class="badge-status ${ord.status.toLowerCase()}">${ord.status}</span></td>
+              <td>
+                <button class="btn-action-small" onclick='showReceiptModal(${JSON.stringify(ord)})'>
+                  🧾 View / Print
+                </button>
+              </td>
+            </tr>
+          `).join('');
+        }
+
+        loadMiniFloor();
+      } catch (e) {
+        console.error('Failed loading stats:', e);
+      }
+    }
+
+    async function loadMiniFloor() {
+      try {
+        const res = await fetch('/api/tables');
+        const data = await res.json();
+        const container = document.getElementById('miniFloorGrid');
+        container.innerHTML = data.tables.map(t => `
+          <div class="table-box ${t.status}" onclick="switchTab('floor')">
+            <div class="table-no">${t.table_number}</div>
+            <div class="table-cap">${t.capacity} Seats</div>
+            <span class="table-state-pill">${t.status}</span>
+          </div>
+        `).join('');
+      } catch (e) {}
+    }
+
+    // 2. POS BILLING & MENU MANAGEMENT
+    let menuData = [];
+    let cart = [];
+
+    async function loadMenu() {
+      try {
+        const res = await fetch('/api/menu');
+        const data = await res.json();
+        menuData = data.menu;
+
+        // Render categories
+        const catContainer = document.getElementById('posCategories');
+        catContainer.innerHTML = `
+          <button class="cat-btn active" onclick="filterMenu('all', this)">All Items</button>
+          ${menuData.map(c => `<button class="cat-btn" onclick="filterMenu(${c.id}, this)">${c.name}</button>`).join('')}
+        `;
+
+        // Populate category dropdown in Add Dish Modal
+        const select = document.getElementById('dishCategorySelect');
+        select.innerHTML = menuData.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+        renderDishGrid('all');
+        populateTableSelect();
+      } catch (e) {
+        console.error('Failed to load menu:', e);
+      }
+    }
+
+    async function populateTableSelect() {
+      try {
+        const res = await fetch('/api/tables');
+        const data = await res.json();
+        const select = document.getElementById('posTableSelect');
+        select.innerHTML = data.tables.map(t => `
+          <option value="${t.table_number}">Table ${t.table_number} (${t.capacity}p)</option>
+        `).join('');
+      } catch (e) {}
+    }
+
+    function filterMenu(catId, btn) {
+      document.querySelectorAll('#posCategories .cat-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderDishGrid(catId);
+    }
+
+    function renderDishGrid(catId) {
+      const grid = document.getElementById('posDishGrid');
+      let items = [];
+      if (catId === 'all') {
+        menuData.forEach(c => items.push(...c.items));
+      } else {
+        const found = menuData.find(c => c.id === catId);
+        if (found) items = found.items;
+      }
+
+      grid.innerHTML = items.map(item => `
+        <div class="dish-card">
+          <div onclick="addToCart(${item.id})" style="cursor:pointer;">
+            <div class="dish-top">
+              <span class="dish-name">${item.name}</span>
+              <span class="veg-dot ${item.is_veg ? '' : 'non-veg'}"></span>
+            </div>
+            <p class="dish-desc">${item.description || ''}</p>
+          </div>
+          <div class="dish-bottom">
+            <span class="dish-price">₹${item.price}</span>
+            <button class="btn-action-small" onclick="addToCart(${item.id})" style="background:var(--orange); color:#fff; border-color:var(--orange);">
+              + Add
+            </button>
+          </div>
+          <div class="dish-tools">
+            <button class="btn-action-small" style="flex:1;" onclick="openEditDishModal(${item.id})">✏️ Edit</button>
+            <button class="btn-action-small danger" onclick="deleteDish(${item.id})">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openAddDishModal() {
+      document.getElementById('dishModalTitle').textContent = 'Add New Dish / Menu Item';
+      document.getElementById('editDishId').value = '';
+      document.getElementById('dishNameInput').value = '';
+      document.getElementById('dishPriceInput').value = '';
+      document.getElementById('dishDescInput').value = '';
+      openModal('dishModal');
+    }
+
+    function openEditDishModal(id) {
+      let item = null;
+      for (const cat of menuData) {
+        const found = cat.items.find(i => i.id === id);
+        if (found) { item = found; break; }
+      }
+      if (!item) return;
+
+      document.getElementById('dishModalTitle').textContent = 'Edit Dish Details & Price';
+      document.getElementById('editDishId').value = item.id;
+      document.getElementById('dishNameInput').value = item.name;
+      document.getElementById('dishPriceInput').value = item.price;
+      document.getElementById('dishDescInput').value = item.description || '';
+      document.getElementById('dishVegSelect').value = item.is_veg ? '1' : '0';
+      document.getElementById('dishCategorySelect').value = item.category_id;
+      openModal('dishModal');
+    }
+
+    async function submitSaveDish() {
+      const editId = document.getElementById('editDishId').value;
+      const name = document.getElementById('dishNameInput').value.trim();
+      const price = parseFloat(document.getElementById('dishPriceInput').value);
+      const category_id = parseInt(document.getElementById('dishCategorySelect').value, 10);
+      const is_veg = parseInt(document.getElementById('dishVegSelect').value, 10);
+      const description = document.getElementById('dishDescInput').value.trim();
+
+      if (!name || isNaN(price)) {
+        alert('Please provide dish name and a valid price.');
+        return;
+      }
+
+      if (editId) {
+        // PATCH
+        await fetch(`/api/menu/${editId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, price, category_id, is_veg, description })
+        });
+        showToast(`Updated "${name}"`);
+      } else {
+        // POST
+        await fetch('/api/menu', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, price, category_id, is_veg, description })
+        });
+        showToast(`Added "${name}" to menu`);
+      }
+
+      closeModal('dishModal');
+      loadMenu();
+    }
+
+    async function deleteDish(id) {
+      if (!confirm('Are you sure you want to remove this dish from the menu?')) return;
+      await fetch(`/api/menu/${id}`, { method: 'DELETE' });
+      showToast('Dish removed from menu');
+      loadMenu();
+    }
+
+    function addToCart(itemId) {
+      let item = null;
+      for (const cat of menuData) {
+        const found = cat.items.find(i => i.id === itemId);
+        if (found) { item = found; break; }
+      }
+      if (!item) return;
+
+      const existing = cart.find(c => c.id === item.id);
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        cart.push({ id: item.id, name: item.name, price: item.price, quantity: 1 });
+      }
+      renderCart();
+    }
+
+    function changeCartQty(itemId, delta) {
+      const idx = cart.findIndex(c => c.id === itemId);
+      if (idx !== -1) {
+        cart[idx].quantity += delta;
+        if (cart[idx].quantity <= 0) cart.splice(idx, 1);
+      }
+      renderCart();
+    }
+
+    function renderCart() {
+      const container = document.getElementById('posCartItems');
+      if (cart.length === 0) {
+        container.innerHTML = '<div class="cart-empty">No items added yet.<br>Click any dish from the catalog.</div>';
+        document.getElementById('posSubtotal').textContent = '₹0.00';
+        document.getElementById('posTax').textContent = '₹0.00';
+        document.getElementById('posTotal').textContent = '₹0.00';
+        return;
+      }
+
+      let subtotal = 0;
+      container.innerHTML = cart.map(i => {
+        const itemTotal = i.price * i.quantity;
+        subtotal += itemTotal;
+        return `
+          <div class="cart-row">
+            <div class="cart-item-info">
+              <div class="cart-item-name">${i.name}</div>
+              <div class="cart-item-unit">₹${i.price} each</div>
+            </div>
+            <div class="cart-item-qty">
+              <button class="btn-qty" onclick="changeCartQty(${i.id}, -1)">−</button>
+              <span style="font-size:13px; font-weight:700;">${i.quantity}</span>
+              <button class="btn-qty" onclick="changeCartQty(${i.id}, 1)">+</button>
+            </div>
+            <div class="cart-item-price">₹${itemTotal}</div>
+          </div>
+        `;
+      }).join('');
+
+      const taxRate = parseFloat(document.getElementById('taxRatePercent').textContent) || 5.0;
+      const tax = Math.round(subtotal * (taxRate / 100) * 100) / 100;
+      const total = subtotal + tax;
+
+      document.getElementById('posSubtotal').textContent = '₹' + subtotal.toFixed(2);
+      document.getElementById('posTax').textContent = '₹' + tax.toFixed(2);
+      document.getElementById('posTotal').textContent = '₹' + total.toFixed(2);
+    }
+
+    function toggleTablePicker() {
+      const type = document.getElementById('posOrderType').value;
+      const select = document.getElementById('posTableSelect');
+      select.disabled = (type !== 'Dine-In');
+    }
+
+    async function submitPOSOrder() {
+      if (cart.length === 0) {
+        alert('Please add at least one item to the cart.');
+        return;
+      }
+
+      const orderType = document.getElementById('posOrderType').value;
+      const tableNumber = orderType === 'Dine-In' ? document.getElementById('posTableSelect').value : null;
+      const customerName = document.getElementById('posCustomerName').value.trim() || 'Walk-in Guest';
+      const customerEmail = document.getElementById('posCustomerEmail').value.trim();
+
+      const payload = {
+        order_type: orderType,
+        table_number: tableNumber,
+        customer_name: customerName,
+        customer_email: customerEmail,
+        items: cart.map(c => ({
+          menu_item_id: c.id,
+          item_name: c.name,
+          unit_price: c.price,
+          quantity: c.quantity
+        }))
+      };
+
+      try {
+        const res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        if (result.success) {
+          showToast(`Order ${result.order.order_no} created successfully!`);
+          cart = [];
+          renderCart();
+          document.getElementById('posCustomerName').value = '';
+          document.getElementById('posCustomerEmail').value = '';
+
+          // Display Invoice Receipt Modal
+          showReceiptModal(result.order);
+        } else {
+          alert('Failed to place order: ' + result.error);
+        }
+      } catch (e) {
+        alert('Error creating order');
+      }
+    }
+
+    // 3. RECEIPT & E-BILL / HARDCOPY MODAL
+    function showReceiptModal(ord) {
+      document.getElementById('recOrderNo').textContent = ord.order_no;
+      document.getElementById('recDate').textContent = new Date(ord.created_at || Date.now()).toLocaleString('en-IN');
+      document.getElementById('recTable').textContent = ord.table_number ? 'Table ' + ord.table_number : 'Takeaway / Counter';
+      document.getElementById('recCustomer').textContent = ord.customer_name || 'Guest';
+
+      const hasEmail = Boolean(ord.customer_email && ord.customer_email.includes('@'));
+      const badgeContainer = document.getElementById('recDeliveryBadge');
+      if (hasEmail) {
+        badgeContainer.innerHTML = `
+          <div class="receipt-badge-delivery delivery-email">
+            📧 Automatic E-Bill Dispatched to: <strong>${ord.customer_email}</strong>
+          </div>
+        `;
+      } else {
+        badgeContainer.innerHTML = `
+          <div class="receipt-badge-delivery delivery-hardcopy">
+            🖨️ Hardcopy Receipt Mode: Print paper receipt below
+          </div>
+        `;
+      }
+
+      const tbody = document.getElementById('recItemsBody');
+      const items = ord.items || [];
+      tbody.innerHTML = items.map(i => `
+        <tr>
+          <td>${i.item_name}</td>
+          <td style="text-align:center;">${i.quantity}</td>
+          <td style="text-align:right;">₹${(i.total_price || i.unit_price * i.quantity).toFixed(2)}</td>
+        </tr>
+      `).join('');
+
+      const sub = ord.subtotal || (ord.total_amount - (ord.tax_amount || 0));
+      document.getElementById('recSubtotal').textContent = '₹' + sub.toFixed(2);
+      document.getElementById('recTax').textContent = '₹' + (ord.tax_amount || 0).toFixed(2);
+      document.getElementById('recGrandTotal').textContent = '₹' + ord.total_amount.toFixed(2);
+
+      openModal('receiptModal');
+    }
+
+    // 4. KITCHEN DISPLAY SYSTEM (KDS)
+    async function loadKDS() {
+      try {
+        const res = await fetch('/api/orders');
+        const data = await res.json();
+        const active = (data.orders || []).filter(o => o.status !== 'Completed' && o.status !== 'Cancelled');
+        const grid = document.getElementById('kdsGrid');
+
+        if (active.length === 0) {
+          grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:50px; background:#fff; border-radius:12px; color:var(--muted);">All orders completed! Kitchen queue is clear.</div>';
+          return;
+        }
+
+        grid.innerHTML = active.map(ord => `
+          <div class="kot-card status-${ord.status.toLowerCase()}">
+            <div class="kot-header">
+              <span class="kot-no">${ord.order_no}</span>
+              <span class="kot-table">${ord.table_number ? 'Table ' + ord.table_number : 'Takeaway'}</span>
+            </div>
+            <div class="kot-body">
+              <div style="font-size:12px; color:var(--muted); margin-bottom:10px;">
+                Guest: <strong>${ord.customer_name || 'Walk-in'}</strong>
+                ${ord.customer_email ? `<br><small>✉️ ${ord.customer_email}</small>` : ''}
+              </div>
+              ${(ord.items || []).map(i => `
+                <div class="kot-item">
+                  <span>${i.item_name}</span>
+                  <span class="kot-item-qty">×${i.quantity}</span>
+                </div>
+              `).join('')}
+            </div>
+            <div class="kot-footer">
+              ${ord.status === 'New' ? `
+                <button class="btn-kot-action btn-kot-prepare" onclick="setOrderStatus(${ord.id}, 'Preparing')">Start Cooking</button>
+              ` : ''}
+              ${ord.status === 'Preparing' ? `
+                <button class="btn-kot-action btn-kot-ready" onclick="setOrderStatus(${ord.id}, 'Ready')">Mark Ready ✓</button>
+              ` : ''}
+              ${ord.status === 'Ready' ? `
+                <button class="btn-kot-action btn-kot-complete" onclick="setOrderStatus(${ord.id}, 'Completed')">Dispatch & Settle</button>
+              ` : ''}
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error('Failed to load KDS:', e);
+      }
+    }
+
+    async function setOrderStatus(id, newStatus) {
+      try {
+        const res = await fetch(`/api/orders/${id}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+        if (res.ok) {
+          showToast(`Order marked ${newStatus}`);
+          loadKDS();
+        }
+      } catch (e) {}
+    }
+
+    // 5. TABLE & FLOOR MANAGEMENT (Add / Remove / Edit Capacity)
+    async function loadTables() {
+      try {
+        const res = await fetch('/api/tables');
+        const data = await res.json();
+        const grid = document.getElementById('floorFullGrid');
+
+        grid.innerHTML = data.tables.map(t => `
+          <div class="card-panel table-box ${t.status}" style="text-align:left; padding:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <span class="table-no" style="font-size:24px;">${t.table_number}</span>
+              <span class="badge-status ${t.status}">${t.status.toUpperCase()}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <span style="font-size:13px; color:var(--muted);">Capacity: <strong>${t.capacity} Guests</strong></span>
+              <button class="btn-action-small" onclick="openEditCapacityModal('${t.table_number}', ${t.capacity})">
+                ✏️ Edit Cap
+              </button>
+            </div>
+            ${t.active_order ? `
+              <div style="background:rgba(0,0,0,0.03); padding:10px; border-radius:8px; font-size:12px; margin-bottom:14px;">
+                Active: <strong>${t.active_order.order_no}</strong> (₹${t.active_order.total_amount})<br>
+                Guest: ${t.active_order.customer_name || 'Guest'}
+              </div>
+            ` : '<div style="font-size:12px; color:var(--muted); margin-bottom:14px;">No active order</div>'}
+            
+            <div style="display:flex; gap:8px;">
+              ${t.status === 'available' ? `
+                <button class="cat-btn" style="flex:1; background:var(--orange); color:#fff; border-color:var(--orange);" onclick="quickSeatTable('${t.table_number}')">Seat Table</button>
+                <button class="btn-action-small danger" onclick="removeTable('${t.table_number}')" title="Remove Table">🗑️</button>
+              ` : `
+                <button class="cat-btn" style="flex:1;" onclick="setTableStatus('${t.table_number}', 'available')">Release Table</button>
+              `}
+              <button class="cat-btn" onclick="toggleTableClean('${t.table_number}', '${t.status}')">
+                ${t.status === 'ready' ? 'Set Avail' : 'Mark Ready'}
+              </button>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error('Failed to load tables:', e);
+      }
+    }
+
+    function openAddTableModal() {
+      document.getElementById('newTableNumber').value = '';
+      document.getElementById('newTableCapacity').value = '4';
+      openModal('tableModal');
+    }
+
+    async function submitAddTable() {
+      const table_number = document.getElementById('newTableNumber').value.trim();
+      const capacity = parseInt(document.getElementById('newTableCapacity').value, 10);
+
+      if (!table_number) {
+        alert('Please enter a table number (e.g. T10).');
+        return;
+      }
+
+      const res = await fetch('/api/tables', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ table_number, capacity })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`Table ${table_number} added with ${capacity} seats!`);
+        closeModal('tableModal');
+        loadTables();
+      } else {
+        alert(data.error || 'Failed to add table');
+      }
+    }
+
+    function openEditCapacityModal(tableNo, currentCap) {
+      document.getElementById('editCapacityTitle').textContent = `Adjust Capacity for ${tableNo}`;
+      document.getElementById('editCapTableNo').value = tableNo;
+      document.getElementById('editCapValue').value = currentCap;
+      openModal('editCapacityModal');
+    }
+
+    async function saveTableCapacity() {
+      const tableNo = document.getElementById('editCapTableNo').value;
+      const capacity = parseInt(document.getElementById('editCapValue').value, 10);
+
+      const res = await fetch(`/api/tables/${tableNo}/capacity`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ capacity })
+      });
+      if (res.ok) {
+        showToast(`Updated ${tableNo} capacity to ${capacity} seats`);
+        closeModal('editCapacityModal');
+        loadTables();
+      }
+    }
+
+    async function removeTable(tableNo) {
+      if (!confirm(`Are you sure you want to remove table ${tableNo}?`)) return;
+      const res = await fetch(`/api/tables/${tableNo}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`Table ${tableNo} removed`);
+        loadTables();
+      } else {
+        alert(data.error || 'Could not remove table');
+      }
+    }
+
+    async function setTableStatus(tableNo, status) {
+      await fetch(`/api/tables/${tableNo}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      showToast(`Table ${tableNo} is now ${status}`);
+      loadTables();
+    }
+
+    function toggleTableClean(tableNo, current) {
+      setTableStatus(tableNo, current === 'ready' ? 'available' : 'ready');
+    }
+
+    function quickSeatTable(tableNo) {
+      setTableStatus(tableNo, 'occupied');
+      document.getElementById('posTableSelect').value = tableNo;
+      switchTab('pos');
+    }
+
+    // 6. INVENTORY & REAL-TIME CHEF STOCK EDITING
+    async function loadInventory() {
+      try {
+        const res = await fetch('/api/inventory');
+        const data = await res.json();
+        const tbody = document.getElementById('inventoryTable');
+
+        tbody.innerHTML = data.inventory.map(item => {
+          const pct = Math.min(100, Math.round((item.current_stock / item.max_stock) * 100));
+          const barClass = pct <= 25 ? 'low' : (pct <= 50 ? 'medium' : '');
+          return `
+            <tr>
+              <td><strong>${item.item_name}</strong></td>
+              <td>
+                <div class="inline-stock-edit">
+                  <input type="number" step="0.5" id="stockInput_${item.id}" value="${item.current_stock}">
+                  <span>${item.unit}</span>
+                  <button class="btn-action-small" onclick="saveChefStock(${item.id})">Save</button>
+                </div>
+              </td>
+              <td>${item.low_stock_threshold} ${item.unit}</td>
+              <td>
+                <span class="badge-status ${item.status === 'In stock' ? 'ready' : 'cancelled'}">
+                  ${item.status}
+                </span>
+              </td>
+              <td style="width:180px;">
+                <div style="font-size:11px; margin-bottom:2px;">${pct}% (${item.current_stock}/${item.max_stock} ${item.unit})</div>
+                <div class="inv-progress-bg">
+                  <div class="inv-progress-bar ${barClass}" style="width:${pct}%;"></div>
+                </div>
+              </td>
+              <td>
+                <div style="display:flex; gap:6px;">
+                  <button class="btn-action-small" onclick="restockItem(${item.id})">+20 ${item.unit}</button>
+                  <button class="btn-action-small danger" onclick="deleteIngredient(${item.id})">🗑️</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (e) {
+        console.error('Failed to load inventory:', e);
+      }
+    }
+
+    async function saveChefStock(id) {
+      const val = parseFloat(document.getElementById(`stockInput_${id}`).value);
+      if (isNaN(val)) return;
+
+      const res = await fetch(`/api/inventory/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ current_stock: val })
+      });
+      if (res.ok) {
+        showToast('Stock level updated in real time!');
+        loadInventory();
+      }
+    }
+
+    function openAddIngredientModal() {
+      document.getElementById('ingNameInput').value = '';
+      document.getElementById('ingStockInput').value = '50';
+      document.getElementById('ingThresholdInput').value = '15';
+      openModal('ingredientModal');
+    }
+
+    async function submitAddIngredient() {
+      const item_name = document.getElementById('ingNameInput').value.trim();
+      const current_stock = parseFloat(document.getElementById('ingStockInput').value);
+      const unit = document.getElementById('ingUnitInput').value;
+      const low_stock_threshold = parseFloat(document.getElementById('ingThresholdInput').value);
+
+      if (!item_name || isNaN(current_stock)) {
+        alert('Please fill out item name and stock amount.');
+        return;
+      }
+
+      await fetch('/api/inventory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item_name, current_stock, max_stock: Math.max(100, current_stock * 2), unit, low_stock_threshold })
+      });
+
+      showToast(`Added ${item_name} to inventory`);
+      closeModal('ingredientModal');
+      loadInventory();
+    }
+
+    async function deleteIngredient(id) {
+      if (!confirm('Remove this ingredient from stock inventory?')) return;
+      await fetch(`/api/inventory/${id}`, { method: 'DELETE' });
+      showToast('Ingredient removed');
+      loadInventory();
+    }
+
+    async function restockItem(id) {
+      try {
+        const res = await fetch(`/api/inventory/${id}/restock`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: 20 })
+        });
+        if (res.ok) {
+          showToast('Stock replenished successfully');
+          loadInventory();
+        }
+      } catch (e) {}
+    }
+
+    // Initial Load with Authentication Guard
+    (async function init() {
+      const authenticated = await checkTenantAuth();
+      if (authenticated) {
+        loadDashboard();
+      }
+    })();
+  </script>
+</body>
+</html>

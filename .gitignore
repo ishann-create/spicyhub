@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+package-lock.json.backup
+
+# Environment & Sensitive Credentials
+.env
+.env.local
+.env.*.local
+
+# Databases & Backups (Prevent accidental leak of customer records)
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+data/backups/
+
+# Logs & Debugging
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# OS Metadata
+.DS_Store
+Thumbs.db
