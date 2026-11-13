@@ -618,6 +618,7 @@
           <label>Access Password</label>
           <input type="password" id="loginPassword" required placeholder="••••••••" value="ishan104">
         </div>
+        <div id="adminLoginAlert" style="display:none; padding:10px 14px; border-radius:8px; background:#450a0a; color:#fca5a5; font-size:13px; font-weight:700; margin-bottom:12px; border:1px solid #7f1d1d;"></div>
         <button type="submit" class="btn-login">Unlock SaaS Admin Console ↗</button>
         <button type="button" onclick="quickAdminLogin('work.ishann@gmail.com', 'ishan104')" class="btn-login" style="background:#16a34a; margin-top:8px;">⚡ 1-Click Instant Superadmin Login ↗</button>
       </form>
@@ -1238,12 +1239,26 @@
     }
 
     async function handleAdminLogin(e) {
-      e.preventDefault();
+      if (e && e.preventDefault) e.preventDefault();
+      const alertBox = document.getElementById('adminLoginAlert');
+      if (alertBox) alertBox.style.display = 'none';
+
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value.trim();
       const btn = document.querySelector('#loginScreen button[type="submit"]');
 
-      if (btn) btn.disabled = true;
+      if (!email || !password) {
+        if (alertBox) {
+          alertBox.textContent = 'Please enter both email and password.';
+          alertBox.style.display = 'block';
+        }
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Verifying superadmin credentials…';
+      }
 
       try {
         const res = await fetch('/api/admin/login', {
@@ -1252,16 +1267,32 @@
           body: JSON.stringify({ email, password })
         });
         const data = await res.json();
-        if (data.success) {
+        if (data.success && data.token) {
           localStorage.setItem('spicyhub_saas_token', data.token);
-          checkAuth();
+          document.getElementById('loginScreen').style.display = 'none';
+          document.getElementById('adminDashboard').style.display = 'flex';
+          try { initSaaSData(); } catch (e) {}
+          showToast('⚡ Welcome to Superadmin Console');
         } else {
-          alert(data.error || 'Invalid credentials');
+          if (alertBox) {
+            alertBox.textContent = '❌ ' + (data.error || 'Invalid credentials');
+            alertBox.style.display = 'block';
+          } else {
+            alert(data.error || 'Invalid credentials');
+          }
         }
       } catch (err) {
-        alert('Login failed. Please check network or rate limit.');
+        if (alertBox) {
+          alertBox.textContent = '❌ Login failed. Network error or rate limit.';
+          alertBox.style.display = 'block';
+        } else {
+          alert('Login failed. Please check network or rate limit.');
+        }
       } finally {
-        if (btn) btn.disabled = false;
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Unlock SaaS Admin Console ↗';
+        }
       }
     }
 

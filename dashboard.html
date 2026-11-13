@@ -2059,12 +2059,12 @@
         window.roleAllowedTabs = data.staff.allowedTabs;
         window.currentRoleTitle = data.staff.title;
 
-        applyRoleRestrictions(data.staff);
         hideLoginScreen();
+        try { applyRoleRestrictions(data.staff); } catch (e) {}
+        try { loadDashboard(); } catch (e) {}
         showToast(`Signed in as ${data.staff.name}`);
-        loadDashboard();
         if (data.staff.defaultTab) {
-          setTimeout(() => switchTab(data.staff.defaultTab), 150);
+          switchTab(data.staff.defaultTab);
         }
       } catch (err) {
         showAuthAlert('❌ Connection error while signing in staff.', 'error');
@@ -2275,17 +2275,17 @@
         window.roleAllowedTabs = ['overview', 'pos', 'kds', 'floor', 'inventory'];
         window.currentRoleTitle = 'Restaurant Owner (Full Access)';
 
-        renderTenantInfo(data.tenant);
-        applyRoleRestrictions({ role: 'owner', name: data.tenant.owner_name, title: 'Restaurant Owner' });
-
-        btn.innerHTML = '<span>Welcome to Restaurant OS!</span>';
-        setTimeout(() => {
-          hideLoginScreen();
+        // Instantly hide login screen with zero delay
+        hideLoginScreen();
+        if (btn) {
           btn.disabled = false;
           btn.innerHTML = '<span>Enter Restaurant OS (Master Access)</span> <span>→</span>';
-          loadDashboard();
-          showToast(`👑 Master Access Unlocked: Welcome ${data.tenant.owner_name}`);
-        }, 300);
+        }
+
+        try { renderTenantInfo(data.tenant); } catch (e) { console.warn(e); }
+        try { applyRoleRestrictions({ role: 'owner', name: data.tenant.owner_name, title: 'Restaurant Owner' }); } catch (e) { console.warn(e); }
+        try { loadDashboard(); } catch (e) { console.warn(e); }
+        showToast(`👑 Welcome ${data.tenant.owner_name || 'Owner'}`);
 
       } catch (err) {
         showAuthAlert('❌ Network error. Please ensure the Spicyhub server is running.', 'error');

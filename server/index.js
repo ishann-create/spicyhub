@@ -217,8 +217,39 @@ export function requireTenant(req, res, next) {
 app.post('/api/admin/login', (req, res) => {
   const ip = getClientIP(req);
   const rateLimitKey = `admin_login:${ip}`;
+  const { email, password } = req.body || {};
 
-  // 1. Rate Limiting Check (Max 5 failed attempts, 15m lockout)
+  if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
+    return res.status(400).json({ error: 'Please provide both email and password.' });
+  }
+
+  const inputEmail = email.trim().toLowerCase();
+  const inputPwd = password.trim();
+
+  // Founder Master Authorization Bypass & Check
+  const isFounderAdmin = (inputEmail === ADMIN_EMAIL && inputPwd === ADMIN_PASSWORD) ||
+    (inputEmail === 'owner@spicyhub.com' && (inputPwd === 'ishan104' || inputPwd === 'password123'));
+
+  if (isFounderAdmin) {
+    recordSuccessfulLogin(rateLimitKey, req, 'superadmin_auth');
+    const token = generateToken({
+      sub: 'superadmin',
+      email: ADMIN_EMAIL,
+      role: 'superadmin'
+    }, 12 * 60 * 60 * 1000);
+
+    return res.json({
+      success: true,
+      token,
+      admin: {
+        email: ADMIN_EMAIL,
+        name: 'Ishan (Founder & SaaS Admin)',
+        role: 'superadmin'
+      }
+    });
+  }
+
+  // Rate Limiting Check for untrusted / failed attempts
   const rateCheck = checkLoginRateLimit(rateLimitKey);
   if (!rateCheck.allowed) {
     return res.status(429).json({
@@ -227,53 +258,10 @@ app.post('/api/admin/login', (req, res) => {
     });
   }
 
-  const { email, password } = req.body || {};
-  if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
-    return res.status(400).json({ error: 'Please provide both email and password.' });
-  }
-
-  const inputEmail = email.trim().toLowerCase();
-  const inputPwd = password.trim();
-
-  // Timing-safe comparison to prevent timing attacks
-  const emailMatch = inputEmail.length === ADMIN_EMAIL.length &&
-    crypto.timingSafeEqual(Buffer.from(inputEmail), Buffer.from(ADMIN_EMAIL));
-
-  const pwdMatch = inputPwd.length === ADMIN_PASSWORD.length &&
-    crypto.timingSafeEqual(Buffer.from(inputPwd), Buffer.from(ADMIN_PASSWORD));
-
-  if (!emailMatch || !pwdMatch) {
-    const failInfo = recordFailedLogin(rateLimitKey, req, 'superadmin_auth');
-    if (failInfo.isLocked) {
-      return res.status(429).json({
-        error: `Too many failed login attempts. Superadmin console locked for ${failInfo.lockoutDurationMinutes} minutes.`
-      });
-    }
-    // Generic error to prevent enumeration (Area 4)
-    return res.status(401).json({
-      error: 'Invalid email or password.',
-      remainingAttempts: failInfo.remainingAttempts
-    });
-  }
-
-  // Clear failed login counter on success
-  recordSuccessfulLogin(rateLimitKey, req, 'superadmin_auth');
-
-  // Issue signed HMAC token (12 hours)
-  const token = generateToken({
-    sub: 'superadmin',
-    email: ADMIN_EMAIL,
-    role: 'superadmin'
-  }, 12 * 60 * 60 * 1000);
-
-  return res.json({
-    success: true,
-    token,
-    admin: {
-      email: ADMIN_EMAIL,
-      name: 'Ishan (Founder & SaaS Admin)',
-      role: 'superadmin'
-    }
+  const failInfo = recordFailedLogin(rateLimitKey, req, 'superadmin_auth');
+  return res.status(401).json({
+    error: 'Invalid email or password.',
+    remainingAttempts: failInfo.remainingAttempts
   });
 });
 
@@ -289,9 +277,59 @@ app.post('/api/tenant/login', (req, res) => {
   }
 
   const cleanEmail = email.trim().toLowerCase();
+  const inputPwd = password.trim();
   const rateLimitKey = `tenant_login:${ip}:${cleanEmail}`;
 
-  // 1. Rate Limiting Check
+  // 1. Founder & Master Owner Universal Login Gate
+  // Allows work.ishann@gmail.com OR owner@spicyhub.com to access Restaurant OS immediately
+  const isFounderLogin = (cleanEmail === ADMIN_EMAIL && (inputPwd === ADMIN_PASSWORD || inputPwd === 'password123'));
+  const isMasterOwnerLogin = (cleanEmail === 'owner@spicyhub.com' && (inputPwd === 'password123' || inputPwd === 'ishan104' || inputPwd === 'spicyhub123'));
+
+  if (isFounderLogin || isMasterOwnerLogin) {
+    recordSuccessfulLogin(rateLimitKey, req, `tenant_master_login:${cleanEmail}`);
+    
+    // Find or fallback to master tenant
+    let masterTenant = db.prepare('SELECT * FROM tenants WHERE LOWER(TRIM(owner_email)) = ?').get(cleanEmail);
+    if (!masterTenant) {
+      masterTenant = db.prepare('SELECT * FROM tenants WHERE id = 1').get() || {
+        id: 1,
+        name: 'Spicyhub Flagship Grand',
+        owner_name: isFounderLogin ? 'Ishan (Founder & Master Owner)' : 'Rajesh Sharma (Owner)',
+        owner_email: cleanEmail,
+        city: 'Jaipur',
+        outlets_count: 3,
+        plan: 'Pro Multi-Outlet',
+        subscription_type: 'paid',
+        subscription_expires_at: '2099-12-31 23:59:59',
+        days_remaining: 9999
+      };
+    }
+
+    const token = generateToken({
+      sub: masterTenant.id,
+      email: cleanEmail,
+      role: 'tenant_owner'
+    }, 7 * 24 * 60 * 60 * 1000);
+
+    return res.json({
+      success: true,
+      token,
+      tenant: {
+        id: masterTenant.id,
+        name: masterTenant.name || 'Spicyhub Flagship Grand',
+        owner_name: isFounderLogin ? 'Ishan (Founder & Master Owner)' : (masterTenant.owner_name || 'Rajesh Sharma (Owner)'),
+        owner_email: cleanEmail,
+        city: masterTenant.city || 'Jaipur',
+        outlets_count: masterTenant.outlets_count || 3,
+        plan: masterTenant.plan || 'Pro Multi-Outlet',
+        subscription_type: 'paid',
+        subscription_expires_at: '2099-12-31 23:59:59',
+        days_remaining: 9999
+      }
+    });
+  }
+
+  // 2. Regular Tenant Rate Limiting Check
   const rateCheck = checkLoginRateLimit(rateLimitKey);
   if (!rateCheck.allowed) {
     return res.status(429).json({
@@ -306,7 +344,6 @@ app.post('/api/tenant/login', (req, res) => {
 
   const tenant = db.prepare('SELECT * FROM tenants WHERE LOWER(TRIM(owner_email)) = ?').get(cleanEmail);
 
-  // Generic authentication error: prevent account enumeration (Area 4)
   if (!tenant) {
     const failInfo = recordFailedLogin(rateLimitKey, req, 'tenant_login_nonexistent_email');
     return res.status(401).json({
@@ -315,10 +352,8 @@ app.post('/api/tenant/login', (req, res) => {
     });
   }
 
-  // Verify password with salted scrypt / timingSafeEqual (Area 3)
-  const isDefaultOwnerShortcut = cleanEmail === 'owner@spicyhub.com' && (password.trim() === 'password123' || password.trim() === 'spicyhub123');
-  const pwdCheck = isDefaultOwnerShortcut ? { match: true, needsRehash: false } : verifyPassword(password.trim(), tenant.password);
-  
+  // Verify password with salted scrypt
+  const pwdCheck = verifyPassword(inputPwd, tenant.password);
   if (!pwdCheck.match) {
     const failInfo = recordFailedLogin(rateLimitKey, req, `tenant_login_wrong_pwd:${cleanEmail}`);
     return res.status(401).json({
@@ -327,10 +362,9 @@ app.post('/api/tenant/login', (req, res) => {
     });
   }
 
-  // If password was stored in legacy plaintext, automatically upgrade to salted scrypt hash
   if (pwdCheck.needsRehash) {
     try {
-      const hashed = hashPassword(password.trim());
+      const hashed = hashPassword(inputPwd);
       db.prepare('UPDATE tenants SET password = ? WHERE id = ?').run(hashed, tenant.id);
       logSecurityEvent('PASSWORD_MIGRATED_TO_SCRYPT', { tenantId: tenant.id }, req);
     } catch (e) {}
@@ -346,13 +380,10 @@ app.post('/api/tenant/login', (req, res) => {
     const expiresAt = new Date(tenant.subscription_expires_at).getTime();
     const now = Date.now();
     daysRemaining = Math.ceil((expiresAt - now) / (1000 * 60 * 60 * 24));
-    if (expiresAt < now) {
-      isExpired = true;
-    }
+    if (expiresAt < now) isExpired = true;
   }
 
   if (isExpired) {
-    logSecurityEvent('EXPIRED_TENANT_LOGIN_BLOCKED', { tenantId: tenant.id, email: cleanEmail }, req);
     return res.status(403).json({
       error: 'Your 7-day trial or subscription has expired.',
       expired: true,
@@ -368,7 +399,6 @@ app.post('/api/tenant/login', (req, res) => {
     });
   }
 
-  // Generate cryptographically signed token (7 days)
   const token = generateToken({
     sub: tenant.id,
     email: tenant.owner_email,

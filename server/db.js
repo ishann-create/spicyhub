@@ -245,6 +245,19 @@ function seedInitialData() {
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+365 days'), ?)
         `).run('Spicyhub Flagship Grand', 'Rajesh Sharma (Owner)', 'owner@spicyhub.com', '+91 98765 00000', 'Jaipur', 3, 'Pro Multi-Outlet', 4999, 'Active', 'paid', defaultHashedPassword, 'spicyhub-flagship');
       }
+
+      // Ensure work.ishann@gmail.com exists with founder master owner credentials
+      const founderEmail = 'work.ishann@gmail.com';
+      const existingFounder = db.prepare('SELECT id FROM tenants WHERE LOWER(TRIM(owner_email)) = ?').get(founderEmail);
+      if (!existingFounder) {
+        db.prepare(`
+          INSERT INTO tenants (name, owner_name, owner_email, owner_phone, city, outlets_count, plan, mrr_amount, status, subscription_type, password, subscription_expires_at, workspace_slug)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+365 days'), ?)
+        `).run('Spicyhub Flagship Grand', 'Ishan (Founder & Master Owner)', founderEmail, '+91 98765 00000', 'Jaipur', 3, 'Enterprise Cloud', 12999, 'Active', 'paid', hashPassword('ishan104'), 'spicyhub-founder');
+      } else {
+        db.prepare('UPDATE tenants SET password = ?, status = ?, subscription_type = ? WHERE LOWER(TRIM(owner_email)) = ?')
+          .run(hashPassword('ishan104'), 'Active', 'paid', founderEmail);
+      }
     }
   } catch (e) {}
 
