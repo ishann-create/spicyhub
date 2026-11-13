@@ -144,6 +144,19 @@ export function initDB() {
       status TEXT NOT NULL DEFAULT 'In stock',
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    -- 6. RESTAURANT STAFF ROLES (Receptionist, Cook/Chef, Waiter)
+    CREATE TABLE IF NOT EXISTS staff_users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      tenant_id INTEGER DEFAULT 1,
+      name TEXT NOT NULL,
+      role TEXT NOT NULL, -- 'owner', 'receptionist', 'chef', 'waiter'
+      pin_code TEXT NOT NULL DEFAULT '1234',
+      email TEXT UNIQUE,
+      password TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+    );
   `);
 
   // Run migrations safely
@@ -205,21 +218,45 @@ function seedInitialData() {
     }
   } catch (e) {}
 
-  // 3. Seed B2B Restaurant Tenants
+  // 3. Seed B2B Restaurant Tenants & Ensure Default Owner Exists
   try {
     const tenantCount = db.prepare('SELECT COUNT(*) as c FROM tenants').get();
+    const defaultHashedPassword = hashPassword('password123');
+    const legacyHashedPassword = hashPassword('spicyhub123');
+
     if (tenantCount.c === 0) {
       const insTenant = db.prepare(`
         INSERT INTO tenants (name, owner_name, owner_email, owner_phone, city, outlets_count, plan, mrr_amount, status, subscription_type, password, subscription_expires_at, workspace_slug) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', ?), ?)
       `);
-      const defaultHashedPassword = hashPassword('spicyhub123');
-      insTenant.run('The Tandoor House', 'Aanya Sharma', 'aanya@tandoorhouse.in', '+91 98765 43210', 'Jaipur', 3, 'Pro Multi-Outlet', 4999, 'Active', 'paid', defaultHashedPassword, '+30 days', 'tandoor-house');
-      insTenant.run('Spice Route Bistro', 'Karan Verma', 'karan@spiceroute.com', '+91 98111 22334', 'Bengaluru', 1, 'Starter POS', 1999, 'Active', 'paid', defaultHashedPassword, '+30 days', 'spice-route');
-      insTenant.run('Royal Spice Dining', 'Rohit Mehra', 'rohit@royalspice.in', '+91 99887 76655', 'Delhi', 4, 'Pro Multi-Outlet', 4999, 'Trial Active', 'trial', defaultHashedPassword, '+7 days', 'royal-spice');
-      insTenant.run('The Grand Haveli Heritage', 'Vikramaditya Singhania', 'vikram@singhaniagroup.in', '+91 98220 11223', 'Udaipur', 8, 'Enterprise Cloud', 12999, 'Trial Active', 'trial', defaultHashedPassword, '+7 days', 'grand-haveli');
-      insTenant.run('Taj Pepper Heritage Bistro', 'Meera Singhania', 'meera@tajdining.com', '+91 97766 55443', 'Mumbai', 12, 'Enterprise Cloud', 12999, 'Trial Active', 'trial', defaultHashedPassword, '+7 days', 'taj-pepper');
-      insTenant.run('Coastal Curry Kitchen', 'Arjun Kamath', 'arjun@coastalcurry.in', '+91 98450 67890', 'Goa', 2, 'Pro Multi-Outlet', 4999, 'Active', 'paid', defaultHashedPassword, '+30 days', 'coastal-curry');
+      insTenant.run('Spicyhub Flagship Grand', 'Rajesh Sharma (Owner)', 'owner@spicyhub.com', '+91 98765 00000', 'Jaipur', 3, 'Pro Multi-Outlet', 4999, 'Active', 'paid', defaultHashedPassword, '+365 days', 'spicyhub-flagship');
+      insTenant.run('The Tandoor House', 'Aanya Sharma', 'aanya@tandoorhouse.in', '+91 98765 43210', 'Jaipur', 3, 'Pro Multi-Outlet', 4999, 'Active', 'paid', legacyHashedPassword, '+30 days', 'tandoor-house');
+      insTenant.run('Spice Route Bistro', 'Karan Verma', 'karan@spiceroute.com', '+91 98111 22334', 'Bengaluru', 1, 'Starter POS', 1999, 'Active', 'paid', legacyHashedPassword, '+30 days', 'spice-route');
+      insTenant.run('Royal Spice Dining', 'Rohit Mehra', 'rohit@royalspice.in', '+91 99887 76655', 'Delhi', 4, 'Pro Multi-Outlet', 4999, 'Trial Active', 'trial', legacyHashedPassword, '+7 days', 'royal-spice');
+      insTenant.run('The Grand Haveli Heritage', 'Vikramaditya Singhania', 'vikram@singhaniagroup.in', '+91 98220 11223', 'Udaipur', 8, 'Enterprise Cloud', 12999, 'Trial Active', 'trial', legacyHashedPassword, '+7 days', 'grand-haveli');
+      insTenant.run('Taj Pepper Heritage Bistro', 'Meera Singhania', 'meera@tajdining.com', '+91 97766 55443', 'Mumbai', 12, 'Enterprise Cloud', 12999, 'Trial Active', 'trial', legacyHashedPassword, '+7 days', 'taj-pepper');
+      insTenant.run('Coastal Curry Kitchen', 'Arjun Kamath', 'arjun@coastalcurry.in', '+91 98450 67890', 'Goa', 2, 'Pro Multi-Outlet', 4999, 'Active', 'paid', legacyHashedPassword, '+30 days', 'coastal-curry');
+    } else {
+      // Ensure owner@spicyhub.com exists even if DB already has records
+      const existingOwner = db.prepare('SELECT id FROM tenants WHERE LOWER(TRIM(owner_email)) = ?').get('owner@spicyhub.com');
+      if (!existingOwner) {
+        db.prepare(`
+          INSERT INTO tenants (name, owner_name, owner_email, owner_phone, city, outlets_count, plan, mrr_amount, status, subscription_type, password, subscription_expires_at, workspace_slug)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+365 days'), ?)
+        `).run('Spicyhub Flagship Grand', 'Rajesh Sharma (Owner)', 'owner@spicyhub.com', '+91 98765 00000', 'Jaipur', 3, 'Pro Multi-Outlet', 4999, 'Active', 'paid', defaultHashedPassword, 'spicyhub-flagship');
+      }
+    }
+  } catch (e) {}
+
+  // 3b. Seed Restaurant Staff Members (Receptionist, Cook/Chef, Waiter)
+  try {
+    const staffCount = db.prepare('SELECT COUNT(*) as c FROM staff_users').get();
+    if (staffCount.c === 0) {
+      const insStaff = db.prepare('INSERT INTO staff_users (tenant_id, name, role, pin_code, email, password) VALUES (?, ?, ?, ?, ?, ?)');
+      const staffPwd = hashPassword('staff123');
+      insStaff.run(1, 'Priya Nair (Receptionist)', 'receptionist', '1111', 'reception@spicyhub.com', staffPwd);
+      insStaff.run(1, 'Chef Vikram (Head Cook)', 'chef', '2222', 'chef@spicyhub.com', staffPwd);
+      insStaff.run(1, 'Amit Sharma (Floor Captain)', 'waiter', '3333', 'waiter@spicyhub.com', staffPwd);
     }
   } catch (e) {}
 

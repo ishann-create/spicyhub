@@ -1210,6 +1210,76 @@
       border-color: var(--orange);
       background: #fff;
     }
+    .auth-tab-nav {
+      display: flex;
+      background: #eef2ed;
+      border-radius: 10px;
+      padding: 4px;
+      gap: 4px;
+      margin-bottom: 18px;
+    }
+    .auth-tab-nav button {
+      flex: 1;
+      padding: 8px 4px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+    .auth-tab-nav button.active {
+      background: #fff;
+      color: var(--ink);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+    .staff-card-option {
+      background: #fff;
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.15s ease;
+      text-align: left;
+    }
+    .staff-card-option:hover {
+      border-color: var(--orange);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .staff-role-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-reception { background: #dbeafe; color: #1e40af; }
+    .badge-chef { background: #fef3c7; color: #b45309; }
+    .badge-waiter { background: #dcfce7; color: #166534; }
+    .badge-owner { background: #ffedd5; color: #c2410c; }
+    .tab-locked-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(251,250,247,0.92);
+      backdrop-filter: blur(4px);
+      z-index: 50;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px;
+    }
   </style>
 </head>
 <body>
@@ -1231,62 +1301,180 @@
       <div id="authAlertBox" class="auth-alert-banner"></div>
 
       <div class="auth-card">
-        <h2 class="card-title">Sign In to Restaurant OS</h2>
-        <p class="card-desc">Enter your registered work credentials to access your restaurant workspace.</p>
+        <!-- Auth Navigation Tabs -->
+        <div class="auth-tab-nav">
+          <button id="authTabBtnOwner" class="active" onclick="switchAuthMode('owner')">👑 Owner Sign In</button>
+          <button id="authTabBtnStaff" onclick="switchAuthMode('staff')">👥 Staff Role Logins</button>
+          <button id="authTabBtnSignup" onclick="switchAuthMode('signup')">⚡ Direct Sign Up</button>
+        </div>
 
-        <form id="ownerLoginForm" onsubmit="handleOwnerAuthSubmit(event)">
-          <div class="auth-field">
-            <label>Work Email</label>
-            <div class="auth-input-wrap">
-              <input type="email" id="authEmailInput" class="auth-input" placeholder="e.g. owner@yourrestaurant.com" required autocomplete="email">
+        <!-- PANEL 1: RESTAURANT OWNER SIGN-IN -->
+        <div id="authPanelOwner">
+          <h2 class="card-title">Restaurant Owner Sign In</h2>
+          <p class="card-desc">Master owner login. Sign in once with your email & password to access and manage every section of your restaurant.</p>
+
+          <form id="ownerLoginForm" onsubmit="handleOwnerAuthSubmit(event)">
+            <div class="auth-field">
+              <label>Owner Work Email</label>
+              <div class="auth-input-wrap">
+                <input type="email" id="authEmailInput" class="auth-input" placeholder="e.g. owner@spicyhub.com" required autocomplete="email">
+              </div>
+            </div>
+
+            <div class="auth-field">
+              <label>Password</label>
+              <div class="auth-input-wrap">
+                <input type="password" id="authPasswordInput" class="auth-input" placeholder="••••••••" required autocomplete="current-password">
+                <button type="button" class="auth-pwd-toggle" onclick="toggleAuthPasswordVisibility()" title="Show/Hide">👁️</button>
+              </div>
+            </div>
+
+            <button type="submit" id="authSubmitBtn" class="btn-auth-submit">
+              <span>Enter Restaurant OS (Master Access)</span>
+              <span>→</span>
+            </button>
+          </form>
+
+          <div class="auth-demo-chips">
+            <div class="auth-demo-label">
+              <span>Quick Demo Accounts</span>
+              <span>Click to auto-fill</span>
+            </div>
+            <div class="auth-chip" onclick="autofillAuth('owner@spicyhub.com', 'password123')">
+              <div>
+                <strong>👑 Spicyhub Flagship Owner</strong> (Full Master Access)
+                <div style="color:var(--muted); font-size:11px;">owner@spicyhub.com · password123</div>
+              </div>
+              <span style="color:var(--orange); font-weight:700;">Fill →</span>
+            </div>
+            <div class="auth-chip" onclick="autofillAuth('aanya@tandoorhouse.in', 'spicyhub123')">
+              <div>
+                <strong>The Tandoor House</strong> (Jaipur Outlet)
+                <div style="color:var(--muted); font-size:11px;">aanya@tandoorhouse.in · spicyhub123</div>
+              </div>
+              <span style="color:var(--orange); font-weight:700;">Fill →</span>
             </div>
           </div>
+        </div>
 
-          <div class="auth-field">
-            <label>Password</label>
-            <div class="auth-input-wrap">
-              <input type="password" id="authPasswordInput" class="auth-input" placeholder="••••••••" required autocomplete="current-password">
-              <button type="button" class="auth-pwd-toggle" onclick="toggleAuthPasswordVisibility()" title="Show/Hide">👁️</button>
-            </div>
-          </div>
+        <!-- PANEL 2: RESTAURANT STAFF ROLE LOGINS -->
+        <div id="authPanelStaff" style="display:none;">
+          <h2 class="card-title">Staff Role Logins</h2>
+          <p class="card-desc">Individual logins for restaurant team members. Staff only see the operational tools permitted for their role.</p>
 
-          <button type="submit" id="authSubmitBtn" class="btn-auth-submit">
-            <span>Enter Restaurant OS</span>
-            <span>→</span>
-          </button>
-        </form>
-
-        <div class="auth-demo-chips">
-          <div class="auth-demo-label">
-            <span>Quick Demo Accounts</span>
-            <span>Click to fill</span>
-          </div>
-          <div class="auth-chip" onclick="autofillAuth('aanya@tandoorhouse.in', 'spicyhub123')">
+          <!-- Receptionist Card -->
+          <div class="staff-card-option" onclick="handleStaffQuickLogin('receptionist', '1111')">
             <div>
-              <strong>The Tandoor House</strong> (Jaipur Outlet)
-              <div style="color:var(--muted); font-size:11px;">aanya@tandoorhouse.in</div>
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                <span class="staff-role-badge badge-reception">👩‍💼 Receptionist / Cashier</span>
+                <span style="font-size:11px; color:var(--muted);">PIN: 1111</span>
+              </div>
+              <div style="font-weight:700; font-size:13px; color:var(--ink);">Priya Nair</div>
+              <div style="font-size:11px; color:var(--muted); margin-top:2px;">
+                Allowed pages: 🪑 <strong>Floor & Tables</strong> + 🧾 <strong>POS Billing & Orders</strong>
+              </div>
             </div>
-            <span style="color:var(--orange); font-weight:700;">Fill →</span>
+            <button class="btn-action-small" style="background:#2563eb; color:#fff; font-size:11px; padding:6px 12px;">Sign In ↗</button>
           </div>
-          <div class="auth-chip" onclick="autofillAuth('karan@spiceroute.com', 'spicyhub123')">
+
+          <!-- Cook / Head Chef Card -->
+          <div class="staff-card-option" onclick="handleStaffQuickLogin('chef', '2222')">
             <div>
-              <strong>Spice Route Bistro</strong> (Bengaluru)
-              <div style="color:var(--muted); font-size:11px;">karan@spiceroute.com</div>
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                <span class="staff-role-badge badge-chef">👨‍🍳 Kitchen Cook / Chef</span>
+                <span style="font-size:11px; color:var(--muted);">PIN: 2222</span>
+              </div>
+              <div style="font-weight:700; font-size:13px; color:var(--ink);">Chef Vikram</div>
+              <div style="font-size:11px; color:var(--muted); margin-top:2px;">
+                Allowed pages: 🍳 <strong>Kitchen KDS Display</strong> + 📦 <strong>Stock & Ingredients</strong>
+              </div>
             </div>
-            <span style="color:var(--orange); font-weight:700;">Fill →</span>
+            <button class="btn-action-small" style="background:#d97706; color:#fff; font-size:11px; padding:6px 12px;">Sign In ↗</button>
           </div>
-          <div class="auth-chip" onclick="autofillAuth('rohit@royalspice.in', 'spicyhub123')">
+
+          <!-- Waiter / Server Card -->
+          <div class="staff-card-option" onclick="handleStaffQuickLogin('waiter', '3333')">
             <div>
-              <strong>Royal Spice Dining</strong> (Delhi 7-Day Trial)
-              <div style="color:var(--muted); font-size:11px;">rohit@royalspice.in</div>
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                <span class="staff-role-badge badge-waiter">🤵 Floor Waiter</span>
+                <span style="font-size:11px; color:var(--muted);">PIN: 3333</span>
+              </div>
+              <div style="font-weight:700; font-size:13px; color:var(--ink);">Amit Sharma</div>
+              <div style="font-size:11px; color:var(--muted); margin-top:2px;">
+                Allowed pages: 🪑 <strong>Floor & Tables Map</strong> + 🍽️ <strong>Take Orders</strong>
+              </div>
             </div>
-            <span style="color:var(--orange); font-weight:700;">Fill →</span>
+            <button class="btn-action-small" style="background:#16a34a; color:#fff; font-size:11px; padding:6px 12px;">Sign In ↗</button>
           </div>
+
+          <div style="font-size:11px; color:var(--muted); text-align:center; margin-top:12px;">
+            💡 <em>Note: Restaurant owners don't need these logins. Owner accounts automatically unlock all pages.</em>
+          </div>
+        </div>
+
+        <!-- PANEL 3: DIRECT SIGN UP (NO TRIAL) -->
+        <div id="authPanelSignup" style="display:none;">
+          <h2 class="card-title">Direct Restaurant Registration</h2>
+          <p class="card-desc">Don't want a free trial? Sign up directly and start running your restaurant operations immediately.</p>
+
+          <form id="directSignupForm" onsubmit="handleDirectSignupSubmit(event)">
+            <div class="auth-field">
+              <label>Restaurant Brand Name</label>
+              <div class="auth-input-wrap">
+                <input type="text" id="signupRestaurantInput" class="auth-input" placeholder="e.g. Royal Curry Bistro" required>
+              </div>
+            </div>
+
+            <div class="auth-field">
+              <label>Owner Full Name</label>
+              <div class="auth-input-wrap">
+                <input type="text" id="signupOwnerInput" class="auth-input" placeholder="e.g. Rahul Sharma" required>
+              </div>
+            </div>
+
+            <div class="auth-field">
+              <label>Work Email</label>
+              <div class="auth-input-wrap">
+                <input type="email" id="signupEmailInput" class="auth-input" placeholder="e.g. rahul@royalcurry.com" required>
+              </div>
+            </div>
+
+            <div class="auth-field">
+              <label>Create Password</label>
+              <div class="auth-input-wrap">
+                <input type="password" id="signupPasswordInput" class="auth-input" placeholder="Minimum 4 characters" required minlength="4">
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div class="auth-field">
+                <label>City</label>
+                <div class="auth-input-wrap">
+                  <input type="text" id="signupCityInput" class="auth-input" placeholder="e.g. Jaipur" value="Jaipur">
+                </div>
+              </div>
+              <div class="auth-field">
+                <label>Plan</label>
+                <div class="auth-input-wrap">
+                  <select id="signupPlanInput" class="auth-input" style="padding:10px;">
+                    <option value="Pro Multi-Outlet">Pro (₹4,999/mo)</option>
+                    <option value="Starter POS">Starter POS (₹1,999/mo)</option>
+                    <option value="Enterprise Cloud">Enterprise (₹12,999/mo)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" id="signupSubmitBtn" class="btn-auth-submit" style="background:#16a34a; margin-top:14px;">
+              <span>Create Account & Enter Restaurant OS</span>
+              <span>→</span>
+            </button>
+          </form>
         </div>
       </div>
 
       <div style="text-align:center; margin-top:20px; font-size:12px; color:var(--muted);">
-        Need a 7-day trial? <a href="/#trial" style="color:var(--green); font-weight:700; text-decoration:none;">Request on Homepage</a> &nbsp;·&nbsp; <a href="/" style="color:var(--muted); text-decoration:none;">← Return Home</a>
+        Want to try free for 7 days first? <a href="/#trial" style="color:var(--green); font-weight:700; text-decoration:none;">Fill 7-Day Trial Form on Homepage</a> &nbsp;·&nbsp; <a href="/" style="color:var(--muted); text-decoration:none;">← Return Home</a>
       </div>
     </div>
   </div>
@@ -1349,8 +1537,8 @@
       </div>
 
       <div style="display:flex; gap:6px;">
-        <button class="btn-site-link" style="flex:1; justify-content:center; background:rgba(255,255,255,0.08); border:none; cursor:pointer;" onclick="openModal('changePasswordModal')">
-          🔑 Password
+        <button class="btn-site-link" style="flex:1; justify-content:center; background:rgba(255,255,255,0.08); border:none; cursor:pointer;" onclick="showLoginScreen()">
+          👥 Switch Role
         </button>
         <button class="btn-site-link" style="flex:1; justify-content:center; background:rgba(239,68,68,0.18); color:#fca5a5; border:none; cursor:pointer;" onclick="logoutTenant()">
           🚪 Sign Out
@@ -1824,8 +2012,161 @@
   <div id="toast">Action completed successfully!</div>
 
   <script>
-    // Global Tenant Session State
+    // Global Tenant & Staff Role Session State
     window.currentTenant = null;
+    window.currentStaff = null;
+    window.currentRole = 'owner';
+    window.roleAllowedTabs = ['overview', 'pos', 'kds', 'floor', 'inventory'];
+    window.currentRoleTitle = 'Restaurant Owner (Full Access)';
+
+    function switchAuthMode(mode) {
+      document.getElementById('authTabBtnOwner').className = mode === 'owner' ? 'active' : '';
+      document.getElementById('authTabBtnStaff').className = mode === 'staff' ? 'active' : '';
+      document.getElementById('authTabBtnSignup').className = mode === 'signup' ? 'active' : '';
+
+      document.getElementById('authPanelOwner').style.display = mode === 'owner' ? 'block' : 'none';
+      document.getElementById('authPanelStaff').style.display = mode === 'staff' ? 'block' : 'none';
+      document.getElementById('authPanelSignup').style.display = mode === 'signup' ? 'block' : 'none';
+      clearAuthAlert();
+    }
+
+    async function handleStaffQuickLogin(role, pin) {
+      clearAuthAlert();
+      showAuthAlert('Verifying staff credentials…', 'info');
+
+      try {
+        const res = await fetch('/api/staff/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role, pin })
+        });
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          showAuthAlert(`❌ ${data.error || 'Failed to authenticate staff.'}`, 'error');
+          return;
+        }
+
+        localStorage.setItem('spicyhub_tenant_token', data.token);
+        localStorage.setItem('spicyhub_staff_session', JSON.stringify(data.staff));
+        window.currentStaff = data.staff;
+        window.currentRole = data.staff.role;
+        window.roleAllowedTabs = data.staff.allowedTabs;
+        window.currentRoleTitle = data.staff.title;
+
+        applyRoleRestrictions(data.staff);
+        hideLoginScreen();
+        showToast(`Signed in as ${data.staff.name}`);
+        loadDashboard();
+        if (data.staff.defaultTab) {
+          setTimeout(() => switchTab(data.staff.defaultTab), 150);
+        }
+      } catch (err) {
+        showAuthAlert('❌ Connection error while signing in staff.', 'error');
+      }
+    }
+
+    async function handleDirectSignupSubmit(e) {
+      e.preventDefault();
+      clearAuthAlert();
+
+      const restaurantName = document.getElementById('signupRestaurantInput').value.trim();
+      const ownerName = document.getElementById('signupOwnerInput').value.trim();
+      const email = document.getElementById('signupEmailInput').value.trim();
+      const password = document.getElementById('signupPasswordInput').value.trim();
+      const city = document.getElementById('signupCityInput').value.trim() || 'Jaipur';
+      const plan = document.getElementById('signupPlanInput').value;
+      const btn = document.getElementById('signupSubmitBtn');
+
+      if (!restaurantName || !ownerName || !email || !password) return;
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>Creating your restaurant account…</span>';
+
+      try {
+        const res = await fetch('/api/tenant/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ restaurantName, ownerName, email, password, city, plan })
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          showAuthAlert(`❌ ${data.error || 'Failed to create account.'}`, 'error');
+          btn.disabled = false;
+          btn.innerHTML = '<span>Create Account & Enter Restaurant OS</span> <span>→</span>';
+          return;
+        }
+
+        localStorage.setItem('spicyhub_tenant_token', data.token);
+        localStorage.setItem('spicyhub_tenant', JSON.stringify(data.tenant));
+        localStorage.removeItem('spicyhub_staff_session');
+        window.currentTenant = data.tenant;
+        window.currentRole = 'owner';
+        window.roleAllowedTabs = ['overview', 'pos', 'kds', 'floor', 'inventory'];
+
+        renderTenantInfo(data.tenant);
+        applyRoleRestrictions({ role: 'owner', name: data.tenant.owner_name, title: 'Restaurant Owner' });
+
+        btn.innerHTML = '<span>Account Created! Entering OS…</span>';
+        setTimeout(() => {
+          hideLoginScreen();
+          btn.disabled = false;
+          btn.innerHTML = '<span>Create Account & Enter Restaurant OS</span> <span>→</span>';
+          loadDashboard();
+          showToast('🎉 Welcome to Spicyhub Restaurant OS!');
+        }, 400);
+
+      } catch (err) {
+        showAuthAlert('❌ Network error creating account. Please try again.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<span>Create Account & Enter Restaurant OS</span> <span>→</span>';
+      }
+    }
+
+    function applyRoleRestrictions(info) {
+      const role = info.role || 'owner';
+      const name = info.name || 'Owner';
+      const topLiveStatus = document.getElementById('topLiveStatus');
+
+      if (role === 'receptionist') {
+        if (topLiveStatus) topLiveStatus.textContent = `👩‍💼 RECEPTIONIST: ${name} (Tables & POS)`;
+        document.querySelectorAll('.side-item button').forEach(b => {
+          const onclickAttr = b.getAttribute('onclick') || '';
+          if (onclickAttr.includes('inventory')) {
+            b.style.opacity = '0.35';
+          } else {
+            b.style.opacity = '1';
+          }
+        });
+      } else if (role === 'chef') {
+        if (topLiveStatus) topLiveStatus.textContent = `👨‍🍳 CHEF: ${name} (KDS & Stock Audits)`;
+        document.querySelectorAll('.side-item button').forEach(b => {
+          const onclickAttr = b.getAttribute('onclick') || '';
+          if (onclickAttr.includes('pos') || onclickAttr.includes('floor')) {
+            b.style.opacity = '0.35';
+          } else {
+            b.style.opacity = '1';
+          }
+        });
+      } else if (role === 'waiter') {
+        if (topLiveStatus) topLiveStatus.textContent = `🤵 WAITER: ${name} (Floor Map)`;
+        document.querySelectorAll('.side-item button').forEach(b => {
+          const onclickAttr = b.getAttribute('onclick') || '';
+          if (onclickAttr.includes('inventory')) {
+            b.style.opacity = '0.35';
+          } else {
+            b.style.opacity = '1';
+          }
+        });
+      } else {
+        // Owner: Full Master Access
+        if (topLiveStatus) topLiveStatus.textContent = `👑 OWNER: ${name} · FULL ACCESS`;
+        document.querySelectorAll('.side-item button').forEach(b => {
+          b.style.opacity = '1';
+        });
+      }
+    }
 
     function toggleAuthPasswordVisibility() {
       const input = document.getElementById('authPasswordInput');
@@ -1833,6 +2174,7 @@
     }
 
     function autofillAuth(email, pwd) {
+      switchAuthMode('owner');
       document.getElementById('authEmailInput').value = email;
       document.getElementById('authPasswordInput').value = pwd;
       clearAuthAlert();
@@ -1907,25 +2249,49 @@
 
         localStorage.setItem('spicyhub_tenant_token', data.token);
         localStorage.setItem('spicyhub_tenant', JSON.stringify(data.tenant));
+        localStorage.removeItem('spicyhub_staff_session');
         window.currentTenant = data.tenant;
+        window.currentStaff = null;
+        window.currentRole = 'owner';
+        window.roleAllowedTabs = ['overview', 'pos', 'kds', 'floor', 'inventory'];
+        window.currentRoleTitle = 'Restaurant Owner (Full Access)';
+
         renderTenantInfo(data.tenant);
+        applyRoleRestrictions({ role: 'owner', name: data.tenant.owner_name, title: 'Restaurant Owner' });
 
         btn.innerHTML = '<span>Welcome to Restaurant OS!</span>';
         setTimeout(() => {
           hideLoginScreen();
           btn.disabled = false;
-          btn.innerHTML = '<span>Enter Restaurant OS</span> <span>→</span>';
+          btn.innerHTML = '<span>Enter Restaurant OS (Master Access)</span> <span>→</span>';
           loadDashboard();
+          showToast(`👑 Master Access Unlocked: Welcome ${data.tenant.owner_name}`);
         }, 300);
 
       } catch (err) {
         showAuthAlert('❌ Network error. Please ensure the Spicyhub server is running.', 'error');
         btn.disabled = false;
-        btn.innerHTML = '<span>Enter Restaurant OS</span> <span>→</span>';
+        btn.innerHTML = '<span>Enter Restaurant OS (Master Access)</span> <span>→</span>';
       }
     }
 
     async function checkTenantAuth() {
+      // 1. Check if staff session exists
+      const staffSession = localStorage.getItem('spicyhub_staff_session');
+      if (staffSession) {
+        try {
+          const s = JSON.parse(staffSession);
+          window.currentStaff = s;
+          window.currentRole = s.role;
+          window.roleAllowedTabs = s.allowedTabs;
+          window.currentRoleTitle = s.title;
+          applyRoleRestrictions(s);
+          hideLoginScreen();
+          return true;
+        } catch(e) {}
+      }
+
+      // 2. Check tenant owner token
       const token = localStorage.getItem('spicyhub_tenant_token');
       if (!token) {
         showLoginScreen();
@@ -1955,7 +2321,11 @@
 
         if (data.success && data.tenant) {
           window.currentTenant = data.tenant;
+          window.currentRole = 'owner';
+          window.roleAllowedTabs = ['overview', 'pos', 'kds', 'floor', 'inventory'];
+          window.currentRoleTitle = 'Restaurant Owner (Full Access)';
           renderTenantInfo(data.tenant);
+          applyRoleRestrictions({ role: 'owner', name: data.tenant.owner_name, title: 'Restaurant Owner' });
           hideLoginScreen();
           return true;
         }
@@ -1997,7 +2367,10 @@
     function logoutTenant() {
       localStorage.removeItem('spicyhub_tenant_token');
       localStorage.removeItem('spicyhub_tenant');
+      localStorage.removeItem('spicyhub_staff_session');
       window.currentTenant = null;
+      window.currentStaff = null;
+      window.currentRole = 'owner';
       showLoginScreen();
     }
 
@@ -2077,6 +2450,23 @@
 
     // Tab Switching
     function switchTab(tabId) {
+      // Role-Based Access Gate
+      if (window.currentRole && window.currentRole !== 'owner') {
+        const allowed = window.roleAllowedTabs || ['overview', 'floor', 'pos', 'kds', 'inventory'];
+        if (!allowed.includes(tabId)) {
+          if (tabId === 'inventory') {
+            showToast('🔒 Kitchen Section: Stock & Ingredients is restricted to Cooks/Chefs and Restaurant Owners.');
+          } else if (tabId === 'pos') {
+            showToast('🔒 Cashier Section: POS Checkout & Billing is restricted to Receptionists and Restaurant Owners.');
+          } else if (tabId === 'floor') {
+            showToast('🔒 Reception Section: Floor & Tables is restricted to Receptionists and Restaurant Owners.');
+          } else {
+            showToast(`🔒 Access restricted for ${window.currentRoleTitle || window.currentRole}.`);
+          }
+          return;
+        }
+      }
+
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.side-item button').forEach(el => el.classList.remove('active'));
 
