@@ -1333,26 +1333,31 @@
               <span>Enter Restaurant OS (Master Access)</span>
               <span>→</span>
             </button>
+
+            <button type="button" onclick="quickOwnerLogin('owner@spicyhub.com', 'password123')" class="btn-auth-submit" style="background:#173b30; margin-top:8px;">
+              <span>⚡ 1-Click Instant Owner Login</span>
+              <span>→</span>
+            </button>
           </form>
 
           <div class="auth-demo-chips">
             <div class="auth-demo-label">
               <span>Quick Demo Accounts</span>
-              <span>Click to auto-fill</span>
+              <span>Click to 1-Click Login</span>
             </div>
-            <div class="auth-chip" onclick="autofillAuth('owner@spicyhub.com', 'password123')">
+            <div class="auth-chip" onclick="quickOwnerLogin('owner@spicyhub.com', 'password123')">
               <div>
                 <strong>👑 Spicyhub Flagship Owner</strong> (Full Master Access)
                 <div style="color:var(--muted); font-size:11px;">owner@spicyhub.com · password123</div>
               </div>
-              <span style="color:var(--orange); font-weight:700;">Fill →</span>
+              <span style="color:var(--orange); font-weight:800; font-size:11px;">1-Click Login ⚡</span>
             </div>
-            <div class="auth-chip" onclick="autofillAuth('aanya@tandoorhouse.in', 'spicyhub123')">
+            <div class="auth-chip" onclick="quickOwnerLogin('aanya@tandoorhouse.in', 'spicyhub123')">
               <div>
                 <strong>The Tandoor House</strong> (Jaipur Outlet)
                 <div style="color:var(--muted); font-size:11px;">aanya@tandoorhouse.in · spicyhub123</div>
               </div>
-              <span style="color:var(--orange); font-weight:700;">Fill →</span>
+              <span style="color:var(--orange); font-weight:800; font-size:11px;">1-Click Login ⚡</span>
             </div>
           </div>
         </div>
@@ -2195,7 +2200,10 @@
 
     function showLoginScreen(alertHtml = null, alertType = 'error') {
       const screen = document.getElementById('ownerLoginScreen');
-      screen.classList.remove('hidden');
+      if (screen) {
+        screen.style.display = 'flex';
+        screen.classList.remove('hidden');
+      }
       if (alertHtml) {
         showAuthAlert(alertHtml, alertType);
       }
@@ -2203,8 +2211,19 @@
 
     function hideLoginScreen() {
       const screen = document.getElementById('ownerLoginScreen');
-      screen.classList.add('hidden');
+      if (screen) {
+        screen.classList.add('hidden');
+        screen.style.display = 'none';
+      }
       clearAuthAlert();
+    }
+
+    async function quickOwnerLogin(email, pwd) {
+      document.getElementById('authEmailInput').value = email;
+      document.getElementById('authPasswordInput').value = pwd;
+      clearAuthAlert();
+      const fakeEvent = { preventDefault: () => {} };
+      await handleOwnerAuthSubmit(fakeEvent);
     }
 
     async function handleOwnerAuthSubmit(e) {
@@ -2505,10 +2524,12 @@
 
         document.getElementById('kdsBadge').textContent = stats.activeOrders;
         if (stats.settings && stats.settings.outlet_name) {
-          document.getElementById('outletBadgeText').textContent = stats.settings.outlet_name;
+          const outEl = document.getElementById('outletBadgeText');
+          if (outEl) outEl.textContent = stats.settings.outlet_name;
         }
         if (stats.settings && stats.settings.tax_rate) {
-          document.getElementById('taxRatePercent').textContent = stats.settings.tax_rate;
+          const taxEl = document.getElementById('taxRatePercent');
+          if (taxEl) taxEl.textContent = stats.settings.tax_rate;
         }
 
         if (stats.lowStockCount > 0) {

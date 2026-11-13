@@ -619,10 +619,11 @@
           <input type="password" id="loginPassword" required placeholder="••••••••" value="ishan104">
         </div>
         <button type="submit" class="btn-login">Unlock SaaS Admin Console ↗</button>
+        <button type="button" onclick="quickAdminLogin('work.ishann@gmail.com', 'ishan104')" class="btn-login" style="background:#16a34a; margin-top:8px;">⚡ 1-Click Instant Superadmin Login ↗</button>
       </form>
 
-      <div class="login-cred-hint">
-        🔐 <strong>Authorized Master Credentials:</strong><br>
+      <div class="login-cred-hint" style="cursor:pointer;" onclick="quickAdminLogin('work.ishann@gmail.com', 'ishan104')">
+        🔐 <strong>Authorized Master Credentials (Click to 1-Click Sign In):</strong><br>
         Email: <code>work.ishann@gmail.com</code><br>
         Password: <code>ishan104</code>
       </div>
@@ -1262,6 +1263,13 @@
       } finally {
         if (btn) btn.disabled = false;
       }
+    }
+
+    async function quickAdminLogin(email, pwd) {
+      document.getElementById('loginEmail').value = email;
+      document.getElementById('loginPassword').value = pwd;
+      const fakeEvent = { preventDefault: () => {} };
+      await handleAdminLogin(fakeEvent);
     }
 
     function adminLogout() {
