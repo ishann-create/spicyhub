@@ -1004,7 +1004,7 @@
       inset: 0;
       background: radial-gradient(circle at 50% 25%, #fbfaf7 0%, #edf1ec 100%);
       z-index: 99999;
-      display: flex;
+      display: none;
       flex-direction: column;
       justify-content: center;
       align-items: center;
@@ -1285,7 +1285,7 @@
 <body>
 
   <!-- UNIFIED RESTAURANT OS SIGN-IN GATEWAY -->
-  <div id="ownerLoginScreen">
+  <div id="ownerLoginScreen" style="display:none;">
     <button type="button" onclick="bypassDirectToOS()" style="position:fixed; top:20px; right:24px; z-index:100000; background:rgba(23,33,30,0.85); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:10px 18px; border-radius:30px; font-size:13px; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 4px 15px rgba(0,0,0,0.2); backdrop-filter:blur(6px);">
       <span>✕ Close & Open Restaurant OS</span> <span>→</span>
     </button>
@@ -3200,10 +3200,12 @@
 
     // Initial Load with Authentication Guard
     (async function init() {
-      const authenticated = await checkTenantAuth();
-      if (authenticated) {
+      try {
+        await checkTenantAuth();
+      } catch (e) {}
+      try {
         loadDashboard();
-      }
+      } catch (e) {}
     })();
   </script>
 </body>
