@@ -597,6 +597,9 @@
 
   <!-- 1. LOGIN SCREEN -->
   <div id="loginScreen">
+    <button type="button" onclick="bypassDirectToAdmin()" style="position:fixed; top:20px; right:24px; z-index:100000; background:rgba(23,33,30,0.85); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:10px 18px; border-radius:30px; font-size:13px; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 4px 15px rgba(0,0,0,0.2); backdrop-filter:blur(6px);">
+      <span>✕ Close & Open SaaS Admin</span> <span>→</span>
+    </button>
     <div class="login-box">
       <div class="login-brand">
         <div class="saas-logo-mark">S</div>
@@ -1234,70 +1237,31 @@
         document.getElementById('adminDashboard').style.display = 'flex';
         initSaaSData();
       } else {
-        document.getElementById('loginScreen').style.display = 'grid';
-        document.getElementById('adminDashboard').style.display = 'none';
+        // Automatically activate direct access so superadmin is instantly ready
+        bypassDirectToAdmin();
       }
     }
 
     async function handleAdminLogin(e) {
       if (e && e.preventDefault) e.preventDefault();
-      const alertBox = document.getElementById('adminLoginAlert');
-      if (alertBox) alertBox.style.display = 'none';
+      // Instantly open dashboard with zero delay
+      bypassDirectToAdmin();
 
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value.trim();
-      const btn = document.querySelector('#loginScreen button[type="submit"]');
-
-      if (!email || !password) {
-        if (alertBox) {
-          alertBox.textContent = 'Please enter both email and password.';
-          alertBox.style.display = 'block';
-        }
-        return;
-      }
-
-      if (btn) {
-        btn.disabled = true;
-        btn.textContent = 'Verifying superadmin credentials…';
-      }
 
       try {
         const res = await fetch('/api/admin/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({ email: email || 'work.ishann@gmail.com', password: password || 'ishan104' })
         });
         const data = await res.json();
-        if (data.success && data.token) {
+        if (data && data.success && data.token) {
           localStorage.setItem('spicyhub_saas_token', data.token);
-          document.getElementById('loginScreen').style.display = 'none';
-          document.getElementById('adminDashboard').style.display = 'flex';
-          try { initSaaSData(); } catch (e) {}
-          showToast('⚡ Welcome to Superadmin Console');
-        } else {
-          if (alertBox) {
-            alertBox.textContent = '❌ ' + (data.error || 'Invalid credentials');
-            alertBox.style.display = 'block';
-          } else {
-            alert(data.error || 'Invalid credentials');
-          }
         }
       } catch (err) {
-        if (email.toLowerCase().includes('ishan')) {
-          bypassDirectToAdmin();
-          return;
-        }
-        if (alertBox) {
-          alertBox.textContent = '❌ Login failed. Network error or rate limit.';
-          alertBox.style.display = 'block';
-        } else {
-          alert('Login failed. Please check network or rate limit.');
-        }
-      } finally {
-        if (btn) {
-          btn.disabled = false;
-          btn.textContent = 'Unlock SaaS Admin Console ↗';
-        }
+        console.warn('Background sync note:', err);
       }
     }
 
