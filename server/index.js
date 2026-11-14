@@ -1479,18 +1479,27 @@ app.post('/api/inventory/:id/restock', (req, res) => {
 // ==========================================
 // 8. SERVE APPLICATION PORTALS (Area 15: Safe routes only)
 // ==========================================
+function setHtmlNoCache(res) {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+}
+
 // Private B2B SaaS Superadmin Portal (Unlinked)
 app.get('/admin', (req, res) => {
+  setHtmlNoCache(res);
   res.sendFile(path.join(rootDir, 'admin.html'));
 });
 
 // Unified Restaurant OS (Workspace & Integrated Owner Sign-In Gateway)
 app.get(['/dashboard', '/app', '/os', '/login', '/trial', '/signin'], (req, res) => {
+  setHtmlNoCache(res);
   res.sendFile(path.join(rootDir, 'dashboard.html'));
 });
 
 // Marketing Landing Page
 app.get('/', (req, res) => {
+  setHtmlNoCache(res);
   res.sendFile(path.join(rootDir, 'index.html'));
 });
 
